@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
+using enBot.Models;
 using enBot.Services;
 using enBot.ViewModels;
 using Microsoft.EntityFrameworkCore;
@@ -18,9 +19,10 @@ namespace enBot;
 public partial class App : Application
 {
     private HttpListenerService? _httpListenerService;
+    private CodexWatcherService? _codexWatcherService;
     private NotificationService? _notificationService;
     private PromptStorageService? _storageService;
-    private ClaudeAnalysisService? _analysisService;
+    private IAnalysisService? _analysisService;
     private TrayIcon? _trayIcon;
 
     public override void Initialize()
@@ -49,29 +51,38 @@ public partial class App : Application
 
             // Services
             _notificationService = new NotificationService(autoCloseSeconds: 30);
-            _analysisService = new ClaudeAnalysisService();
+            var settings = AppSettingsService.Load();
+            _analysisService = settings.AnalysisProvider == "codex"
+                ? new CodexAnalysisService()
+                : new ClaudeAnalysisService();
+
             _httpListenerService = new HttpListenerService("http://localhost:5151/");
-            _httpListenerService.OnRawPromptReceived = rawPrompt =>
-            {
-                _ = Task.Run(async () =>
-                {
-                    var payload = await _analysisService.AnalyzeAsync(rawPrompt.Original).ConfigureAwait(false);
-                    if (payload is null) return;
-                    _notificationService.Show(payload);
-                    await _storageService.SavePromptAsync(payload).ConfigureAwait(false);
-                });
-            };
+            _httpListenerService.OnRawPromptReceived = HandleRawPrompt;
+
+            _codexWatcherService = new CodexWatcherService();
+            _codexWatcherService.OnRawPromptReceived = HandleRawPrompt;
 
             // Tray icon
             var trayViewModel = new TrayViewModel(_storageService);
             SetupTrayIcon(trayViewModel);
 
-            // Start HTTP listener
-            desktop.Startup += (_, _) => _httpListenerService.Start();
-            desktop.Exit += (_, _) => _httpListenerService.Stop();
+            // Start services
+            desktop.Startup += (_, _) => { _httpListenerService.Start(); _codexWatcherService.Start(); };
+            desktop.Exit += (_, _) => { _httpListenerService.Stop(); _codexWatcherService.Stop(); };
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void HandleRawPrompt(RawPrompt rawPrompt)
+    {
+        _ = Task.Run(async () =>
+        {
+            var payload = await _analysisService!.AnalyzeAsync(rawPrompt.Original).ConfigureAwait(false);
+            if (payload is null) return;
+            _notificationService!.Show(payload);
+            await _storageService!.SavePromptAsync(payload).ConfigureAwait(false);
+        });
     }
 
     private void SetupTrayIcon(TrayViewModel trayViewModel)

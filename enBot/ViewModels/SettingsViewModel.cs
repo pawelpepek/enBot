@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using enBot.Services;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -12,6 +13,42 @@ public partial class SettingsViewModel : ViewModelBase
 {
     [ObservableProperty] private string _selectedFolder = "";
     [ObservableProperty] private string _statusMessage = "";
+    public bool IsClaudeAvailable { get; } = AppSettingsService.IsClaudeAvailable();
+    public bool IsCodexAvailable { get; } = AppSettingsService.IsCodexAvailable();
+
+    [ObservableProperty] private bool _isClaudeSelected;
+    [ObservableProperty] private bool _isCodexSelected;
+
+    private readonly AppSettingsService _appSettings;
+
+    public SettingsViewModel()
+    {
+        _appSettings = AppSettingsService.Load();
+        var provider = _appSettings.AnalysisProvider;
+
+        // If saved provider is unavailable, fall back to whichever is available
+        if (provider == "claude" && !IsClaudeAvailable && IsCodexAvailable)
+            provider = "codex";
+        else if (provider == "codex" && !IsCodexAvailable && IsClaudeAvailable)
+            provider = "claude";
+
+        _isClaudeSelected = provider == "claude";
+        _isCodexSelected = provider == "codex";
+    }
+
+    partial void OnIsClaudeSelectedChanged(bool value)
+    {
+        if (!value) return;
+        _appSettings.AnalysisProvider = "claude";
+        _appSettings.Save();
+    }
+
+    partial void OnIsCodexSelectedChanged(bool value)
+    {
+        if (!value) return;
+        _appSettings.AnalysisProvider = "codex";
+        _appSettings.Save();
+    }
 
     private const string HookScript = """
         if (process.env.ENBOT_ANALYSIS) process.exit(0);
