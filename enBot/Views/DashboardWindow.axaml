@@ -1,0 +1,62 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:enBot.ViewModels"
+        xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+        x:Class="enBot.Views.DashboardWindow"
+        x:DataType="vm:DashboardViewModel"
+        Title="enBot — Dashboard"
+        Width="900" Height="600"
+        MinWidth="700" MinHeight="450">
+
+    <Design.DataContext>
+        <vm:DashboardViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Summary bar -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                Padding="20,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="32">
+                    <StackPanel>
+                        <TextBlock Text="Total Prompts" FontSize="11" Opacity="0.6"/>
+                        <TextBlock Text="{Binding TotalPrompts}" FontSize="22" FontWeight="Bold"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Score" FontSize="11" Opacity="0.6"/>
+                        <TextBlock FontSize="22" FontWeight="Bold">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0}/10">
+                                    <Binding Path="AvgWeightedScore"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Complexity" FontSize="11" Opacity="0.6"/>
+                        <TextBlock FontSize="22" FontWeight="Bold">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0}/10">
+                                    <Binding Path="AvgWeightedComplexity"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <CheckBox Content="Show prompt counts" IsChecked="{Binding ShowPromptCounts}" VerticalAlignment="Center"/>
+                    <Button Content="Refresh" Command="{Binding RefreshCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- History chart -->
+        <lvc:CartesianChart Grid.Row="1"
+                            Series="{Binding ChartSeries}"
+                            XAxes="{Binding ChartXAxes}"
+                            YAxes="{Binding ChartYAxes}"
+                            Margin="16"/>
+    </Grid>
+</Window>

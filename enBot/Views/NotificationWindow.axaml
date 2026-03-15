@@ -1,0 +1,130 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:enBot.ViewModels"
+        xmlns:models="using:enBot.Models"
+        xmlns:converters="using:enBot.Converters"
+        x:Class="enBot.Views.NotificationWindow"
+        x:DataType="vm:NotificationViewModel"
+        Width="420"
+        SizeToContent="Height"
+        ShowInTaskbar="False"
+        Topmost="True"
+        CanResize="False"
+        ShowActivated="False"
+        SystemDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="AcrylicBlur, Blur, None">
+
+    <Window.Resources>
+        <converters:ScoreToColorConverter x:Key="ScoreToColor"/>
+        <converters:ComplexityToColorConverter x:Key="ComplexityToColor"/>
+        <converters:BoldIfTrueConverter x:Key="BoldIfTrue"/>
+        <converters:ItalicIfTrueConverter x:Key="ItalicIfTrue"/>
+    </Window.Resources>
+
+    <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+            CornerRadius="10"
+            BoxShadow="0 4 20 0 #40000000">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto" Margin="16">
+
+            <!-- Header row: title + language + score + complexity badges -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto">
+                <TextBlock Text="enBot"
+                           FontWeight="SemiBold"
+                           FontSize="13"
+                           VerticalAlignment="Center"/>
+
+                <!-- Language badge -->
+                <Border Grid.Column="1"
+                        Background="#607D8B"
+                        CornerRadius="10"
+                        Padding="8,3"
+                        Margin="6,0">
+                    <TextBlock Text="{Binding Language}"
+                               Foreground="White"
+                               FontSize="11"
+                               FontWeight="SemiBold"/>
+                </Border>
+
+                <!-- Score badge -->
+                <Border Grid.Column="2"
+                        Background="{Binding Score, Converter={StaticResource ScoreToColor}}"
+                        CornerRadius="10"
+                        Padding="8,3"
+                        Margin="0,0,6,0"
+                        ToolTip.Tip="Grammar score">
+                    <TextBlock Text="{Binding ScoreText}"
+                               Foreground="White"
+                               FontSize="11"
+                               FontWeight="Bold"/>
+                </Border>
+
+                <!-- Complexity badge -->
+                <Border Grid.Column="3"
+                        Background="{Binding Complexity, Converter={StaticResource ComplexityToColor}}"
+                        CornerRadius="10"
+                        Padding="8,3"
+                        ToolTip.Tip="Linguistic complexity">
+                    <TextBlock Text="{Binding ComplexityText}"
+                               Foreground="White"
+                               FontSize="11"
+                               FontWeight="Bold"/>
+                </Border>
+            </Grid>
+
+            <!-- Corrected with bold highlights -->
+            <StackPanel Grid.Row="1" Margin="0,12,0,0">
+                <TextBlock Text="Corrected"
+                           FontSize="10"
+                           Opacity="0.55"
+                           Margin="0,0,0,3"/>
+                <ItemsControl ItemsSource="{Binding CorrectedInlines}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:InlineSegment">
+                            <TextBlock Text="{Binding Text}"
+                                       FontSize="13"
+                                       FontWeight="{Binding IsBold, Converter={StaticResource BoldIfTrue}}"
+                                       FontStyle="{Binding IsItalic, Converter={StaticResource ItalicIfTrue}}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- Original -->
+            <StackPanel Grid.Row="2" Margin="0,10,0,0">
+                <TextBlock Text="Original"
+                           FontSize="10"
+                           Opacity="0.55"
+                           Margin="0,0,0,3"/>
+                <ItemsControl ItemsSource="{Binding OriginalInlines}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:InlineSegment">
+                            <TextBlock Text="{Binding Text}"
+                                       FontSize="13"
+                                       FontWeight="{Binding IsBold, Converter={StaticResource BoldIfTrue}}"
+                                       FontStyle="{Binding IsItalic, Converter={StaticResource ItalicIfTrue}}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- Close button -->
+            <Button Grid.Row="3"
+                    Content="Close"
+                    HorizontalAlignment="Right"
+                    Margin="0,12,0,0"
+                    Padding="12,4"
+                    x:Name="CloseButton"/>
+        </Grid>
+    </Border>
+</Window>
