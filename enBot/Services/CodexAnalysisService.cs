@@ -73,7 +73,6 @@ public class CodexAnalysisService : IAnalysisService
             Corrected = result.Corrected ?? original,
             Score = result.Score > 0 ? result.Score : 5,
             Complexity = result.Complexity > 0 ? result.Complexity : 5,
-            Language = result.Language ?? "en",
             WordCount = wordCount,
             Explanations = result.Explanations ?? [],
             HookVersion = "2.0"

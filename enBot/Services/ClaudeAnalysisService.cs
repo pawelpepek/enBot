@@ -35,7 +35,9 @@ public class ClaudeAnalysisService : IAnalysisService
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
-            CreateNoWindow = true
+            CreateNoWindow = true,
+            StandardOutputEncoding = System.Text.Encoding.UTF8,
+            StandardErrorEncoding = System.Text.Encoding.UTF8
         };
         psi.ArgumentList.Add("--print");
         psi.Environment["ENBOT_ANALYSIS"] = "1";
@@ -76,7 +78,6 @@ public class ClaudeAnalysisService : IAnalysisService
             Corrected = result.Corrected ?? original,
             Score = result.Score > 0 ? result.Score : 5,
             Complexity = result.Complexity > 0 ? result.Complexity : 5,
-            Language = result.Language ?? "en",
             WordCount = wordCount,
             Explanations = result.Explanations ?? [],
             HookVersion = "2.0"

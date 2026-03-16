@@ -38,7 +38,6 @@ public class PromptStorageService
             Corrected = payload.Corrected,
             Score = payload.Score,
             WordCount = payload.WordCount,
-            Language = payload.Language,
             Complexity = payload.Complexity,
             HookVersion = payload.HookVersion,
             ExplanationsJson = payload.Explanations is { Count: > 0 }

@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using enBot.Models;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -13,6 +14,8 @@ public partial class NotificationViewModel : ViewModelBase
     public int Complexity { get; }
     public string ComplexityText { get; }
     public string Language { get; }
+    public List<string> Explanations { get; }
+    public bool HasExplanations { get; }
 
     public NotificationViewModel(HookPayload payload)
     {
@@ -22,7 +25,9 @@ public partial class NotificationViewModel : ViewModelBase
         ScoreText = $"{payload.Score}/10";
         Complexity = payload.Complexity;
         ComplexityText = $"C {payload.Complexity}/10";
-        Language = payload.Language.ToUpperInvariant();
+        Language = "EN";
+        Explanations = payload.Explanations ?? [];
+        HasExplanations = Explanations.Count > 0;
     }
 
     private static List<InlineSegment> ParseCorrected(string corrected)

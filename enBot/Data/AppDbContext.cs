@@ -14,7 +14,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<PromptEntry>(e =>
         {
             e.HasKey(p => p.Id);
-            e.Property(p => p.Language).HasMaxLength(10);
         });
     }
 }

@@ -20,9 +20,6 @@ public record HookPayload
     [JsonPropertyName("complexity")]
     public int Complexity { get; init; }
 
-    [JsonPropertyName("language")]
-    public string Language { get; init; } = "en";
-
     [JsonPropertyName("wordCount")]
     public int WordCount { get; init; }
 
