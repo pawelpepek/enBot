@@ -18,12 +18,12 @@ namespace enBot;
 
 public partial class App : Application
 {
-    private HttpListenerService? _httpListenerService;
-    private CodexWatcherService? _codexWatcherService;
-    private NotificationService? _notificationService;
-    private PromptStorageService? _storageService;
-    private IAnalysisService? _analysisService;
-    private TrayIcon? _trayIcon;
+    private HttpListenerService _httpListenerService;
+    private CodexWatcherService _codexWatcherService;
+    private NotificationService _notificationService;
+    private PromptStorageService _storageService;
+    private IAnalysisService _analysisService;
+    private TrayIcon _trayIcon;
 
     public override void Initialize()
     {

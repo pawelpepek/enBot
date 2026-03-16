@@ -27,5 +27,5 @@ public record HookPayload
     public List<string>? Explanations { get; init; }
 
     [JsonPropertyName("hookVersion")]
-    public string? HookVersion { get; init; }
+    public string HookVersion { get; init; }
 }

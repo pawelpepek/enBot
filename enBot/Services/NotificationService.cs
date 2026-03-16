@@ -14,7 +14,7 @@ public class NotificationService
         _autoCloseSeconds = autoCloseSeconds;
     }
 
-    private NotificationWindow? _current;
+    private NotificationWindow _current;
 
     public void Show(HookPayload payload)
     {

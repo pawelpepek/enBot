@@ -10,9 +10,9 @@ namespace enBot.Services;
 
 public class CodexWatcherService : IDisposable
 {
-    public Action<RawPrompt>? OnRawPromptReceived { get; set; }
+    public Action<RawPrompt> OnRawPromptReceived { get; set; }
 
-    private CancellationTokenSource? _cts;
+    private CancellationTokenSource _cts;
     private readonly Dictionary<string, long> _filePositions = new();
     private readonly string _sessionsRoot;
     private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(500);
@@ -74,7 +74,7 @@ public class CodexWatcherService : IDisposable
 
             fs.Seek(startPos, SeekOrigin.Begin);
             using var reader = new StreamReader(fs);
-            string? line;
+            string line;
             while ((line = reader.ReadLine()) is not null)
             {
                 var message = TryParseUserMessage(line);
@@ -86,7 +86,7 @@ public class CodexWatcherService : IDisposable
         catch { }
     }
 
-    private static string? TryParseUserMessage(string line)
+    private static string TryParseUserMessage(string line)
     {
         if (string.IsNullOrWhiteSpace(line)) return null;
         try
@@ -105,7 +105,7 @@ public class CodexWatcherService : IDisposable
 
     private record CodexEvent(
         [property: JsonPropertyName("type")] string Type,
-        [property: JsonPropertyName("payload")] CodexPayload? Payload);
+        [property: JsonPropertyName("payload")] CodexPayload Payload);
 
     private record CodexPayload(
         [property: JsonPropertyName("type")] string Type,

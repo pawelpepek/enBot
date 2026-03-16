@@ -8,7 +8,7 @@ namespace enBot.Views;
 
 public partial class NotificationWindow : Window
 {
-    private DispatcherTimer? _timer;
+    private DispatcherTimer _timer;
 
     public NotificationWindow()
     {
@@ -48,7 +48,7 @@ public partial class NotificationWindow : Window
         );
     }
 
-    private void OnDismiss(object? sender, RoutedEventArgs e)
+    private void OnDismiss(object sender, RoutedEventArgs e)
     {
         _timer?.Stop();
         Close();

@@ -22,9 +22,9 @@ public partial class DashboardViewModel : ViewModelBase
     [ObservableProperty] private bool _isLoading = true;
     [ObservableProperty] private bool _showPromptCounts = false;
 
-    [ObservableProperty] private ISeries[] _chartSeries = Array.Empty<ISeries>();
-    [ObservableProperty] private Axis[] _chartXAxes = Array.Empty<Axis>();
-    [ObservableProperty] private Axis[] _chartYAxes = Array.Empty<Axis>();
+    [ObservableProperty] private ISeries[] _chartSeries = [];
+    [ObservableProperty] private Axis[] _chartXAxes = [];
+    [ObservableProperty] private Axis[] _chartYAxes = [];
 
     public DashboardViewModel(PromptStorageService storageService)
     {
@@ -105,26 +105,26 @@ public partial class DashboardViewModel : ViewModelBase
             ScalesYAt = ShowPromptCounts ? 1 : 0
         });
 
-        ChartSeries = series.ToArray();
+        ChartSeries = [.. series];
 
-        ChartXAxes = new[]
-        {
+        ChartXAxes =
+        [
             new Axis
             {
                 Labels = labels,
                 LabelsRotation = labels.Count > 10 ? -45 : 0
             }
-        };
+        ];
 
         ChartYAxes = ShowPromptCounts
-            ? new[]
-              {
+            ?
+              [
                   new Axis { Name = "Prompts", MinLimit = 0 },
                   new Axis { Name = "Score / Complexity", MinLimit = 0, MaxLimit = 10 }
-              }
-            : new[]
-              {
+              ]
+            :
+              [
                   new Axis { Name = "Score / Complexity", MinLimit = 0, MaxLimit = 10 }
-              };
+              ];
     }
 }

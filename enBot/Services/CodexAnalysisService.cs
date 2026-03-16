@@ -12,7 +12,7 @@ namespace enBot.Services;
 
 public class CodexAnalysisService : IAnalysisService
 {
-    public async Task<HookPayload?> AnalyzeAsync(string original)
+    public async Task<HookPayload> AnalyzeAsync(string original)
     {
         int wordCount = original.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
 
@@ -54,7 +54,7 @@ public class CodexAnalysisService : IAnalysisService
         var jsonText = ExtractJson(output.Trim());
         if (string.IsNullOrEmpty(jsonText)) return null;
 
-        AnalysisResult? result;
+        AnalysisResult result;
         try
         {
             result = JsonSerializer.Deserialize<AnalysisResult>(jsonText);
@@ -94,10 +94,10 @@ public class CodexAnalysisService : IAnalysisService
     private record AnalysisResult
     {
         [JsonPropertyName("displayOriginal")]
-        public string? DisplayOriginal { get; init; }
+        public string DisplayOriginal { get; init; }
 
         [JsonPropertyName("corrected")]
-        public string? Corrected { get; init; }
+        public string Corrected { get; init; }
 
         [JsonPropertyName("score")]
         public int Score { get; init; }
@@ -106,9 +106,9 @@ public class CodexAnalysisService : IAnalysisService
         public int Complexity { get; init; }
 
         [JsonPropertyName("language")]
-        public string? Language { get; init; }
+        public string Language { get; init; }
 
         [JsonPropertyName("explanations")]
-        public List<string>? Explanations { get; init; }
+        public List<string> Explanations { get; init; }
     }
 }

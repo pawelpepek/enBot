@@ -13,7 +13,7 @@ public class TrayViewModel
         _storageService = storageService;
     }
 
-    private DashboardWindow? _dashboardWindow;
+    private DashboardWindow _dashboardWindow;
 
     public void OpenDashboard()
     {

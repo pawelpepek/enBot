@@ -13,9 +13,9 @@ public class HttpListenerService : IDisposable
 {
     private readonly HttpListener _listener = new();
     private readonly CancellationTokenSource _cts = new();
-    private Task? _loopTask;
+    private Task _loopTask;
 
-    public Action<RawPrompt>? OnRawPromptReceived { get; set; }
+    public Action<RawPrompt> OnRawPromptReceived { get; set; }
 
     public HttpListenerService(string prefix = "http://localhost:5151/")
     {

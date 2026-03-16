@@ -9,7 +9,7 @@ public class ScoreToColorConverter : IValueConverter
 {
     public static readonly ScoreToColorConverter Instance = new();
 
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is int score)
         {
@@ -22,6 +22,6 @@ public class ScoreToColorConverter : IValueConverter
         return new SolidColorBrush(Colors.Gray);
     }
 
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }

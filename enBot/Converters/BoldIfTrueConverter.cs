@@ -9,9 +9,9 @@ public class BoldIfTrueConverter : IValueConverter
 {
     public static readonly BoldIfTrueConverter Instance = new();
 
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is true ? FontWeight.Bold : FontWeight.Normal;
 
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         => throw new NotSupportedException();
 }
