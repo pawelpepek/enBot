@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -54,7 +55,7 @@ public class AppSettingsService
     {
         try
         {
-            using var p = Process.Start(new ProcessStartInfo(exe, "--version")
+            using var p = Process.Start(new ProcessStartInfo("cmd.exe", $"/c {exe} --version")
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

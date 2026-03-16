@@ -52,9 +52,8 @@ public partial class App : Application
             // Services
             _notificationService = new NotificationService(autoCloseSeconds: 30);
             var settings = AppSettingsService.Load();
-            _analysisService = settings.AnalysisProvider == "codex"
-                ? new CodexAnalysisService()
-                : new ClaudeAnalysisService();
+            var processor = AgentCliProcessorFactory.Create(settings.AnalysisProvider);
+            _analysisService = new AnalysisService(processor);
 
             _httpListenerService = new HttpListenerService("http://localhost:5151/");
             _httpListenerService.OnRawPromptReceived = HandleRawPrompt;
@@ -78,10 +77,18 @@ public partial class App : Application
     {
         _ = Task.Run(async () =>
         {
-            var payload = await _analysisService!.AnalyzeAsync(rawPrompt.Original).ConfigureAwait(false);
-            if (payload is null) return;
-            _notificationService!.Show(payload);
-            await _storageService!.SavePromptAsync(payload).ConfigureAwait(false);
+            try
+            {
+                var payload = await _analysisService!.AnalyzeAsync(rawPrompt.Original).ConfigureAwait(false);
+                if (payload is null) return;
+                _notificationService!.Show(payload);
+                await _storageService!.SavePromptAsync(payload).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                var logPath = Path.Combine(Path.GetTempPath(), "enBot_storage_error.log");
+                await File.AppendAllTextAsync(logPath, $"[{DateTime.UtcNow:O}] {ex}\n\n").ConfigureAwait(false);
+            }
         });
     }
 
