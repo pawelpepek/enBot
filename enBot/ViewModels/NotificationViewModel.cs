@@ -14,7 +14,7 @@ public partial class NotificationViewModel : ViewModelBase
     public int Complexity { get; }
     public string ComplexityText { get; }
     public string Language { get; }
-    public List<string> Explanations { get; }
+    public List<List<InlineSegment>> Explanations { get; }
     public bool HasExplanations { get; }
 
     public NotificationViewModel(HookPayload payload)
@@ -26,7 +26,7 @@ public partial class NotificationViewModel : ViewModelBase
         Complexity = payload.Complexity;
         ComplexityText = $"C {payload.Complexity}/10";
         Language = "EN";
-        Explanations = payload.Explanations ?? [];
+        Explanations = (payload.Explanations ?? []).ConvertAll(ParseCorrected);
         HasExplanations = Explanations.Count > 0;
     }
 

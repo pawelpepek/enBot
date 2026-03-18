@@ -32,8 +32,8 @@ public partial class SettingsViewModel : ViewModelBase
         else if (provider == "codex" && !IsCodexAvailable && IsClaudeAvailable)
             provider = "claude";
 
-        _isClaudeSelected = provider == "claude";
-        _isCodexSelected = provider == "codex";
+        _isClaudeSelected = provider == "claude" && IsClaudeAvailable;
+        _isCodexSelected = provider == "codex" && IsCodexAvailable;
     }
 
     partial void OnIsClaudeSelectedChanged(bool value)

@@ -50,7 +50,7 @@
                    FontWeight="SemiBold"/>
 
         <StackPanel Grid.Row="7" Spacing="8">
-            <RadioButton Content="Claude Code (claude --print)"
+            <RadioButton Content="Claude Code"
                          IsChecked="{Binding IsClaudeSelected}"
                          IsEnabled="{Binding IsClaudeAvailable}"
                          GroupName="Provider"/>
@@ -58,7 +58,7 @@
                        FontSize="11"
                        Opacity="0.55"
                        IsVisible="{Binding !IsClaudeAvailable}"/>
-            <RadioButton Content="Codex (codex exec)"
+            <RadioButton Content="Codex"
                          IsChecked="{Binding IsCodexSelected}"
                          IsEnabled="{Binding IsCodexAvailable}"
                          GroupName="Provider"/>
