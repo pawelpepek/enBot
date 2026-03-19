@@ -19,31 +19,43 @@ The app runs as a **system tray application** with no main window — `ShutdownM
 
 ## Architecture
 
-enBot is an Avalonia desktop tray app (.NET 10) following MVVM architecture via **CommunityToolkit.Mvvm**. Its purpose is to intercept Claude Code prompts via a local HTTP hook, analyze them for English quality using the `claude` CLI, show a toast notification, and persist results for dashboard visualisation.
+enBot is an Avalonia desktop tray app (.NET 10) following MVVM architecture via **CommunityToolkit.Mvvm**. Its purpose is to intercept prompts from AI coding agents (Claude Code or Codex), analyse them for English quality using the selected CLI, show a toast notification with corrections and score, and persist results for dashboard visualisation.
 
-### Request flow
+### Analysis providers
+
+The active provider is stored in `AppSettingsService` (`%APPDATA%/enBot/settings.json`, field `analysisProvider`: `"claude"` or `"codex"`). `AgentCliProcessorFactory.Create(provider)` returns the appropriate `IAgentCliProcessor` implementation (`ClaudeCliProcessor` or `CodexCliProcessor`). `AnalysisService` uses that processor to spawn the CLI and parse the JSON response.
+
+### Request flow — Claude mode
 
 1. **Claude Code hook** POSTs JSON `{"original": "..."}` to `http://localhost:5151/hook`
 2. `HttpListenerService` receives it and fires `OnRawPromptReceived`
-3. `ClaudeAnalysisService.AnalyzeAsync` spawns `claude --print` as a subprocess, passes the analysis prompt via stdin, and parses the JSON response
-4. `NotificationService` shows a `NotificationWindow` (auto-closes after 30 s) on the UI thread via `Dispatcher.UIThread.Post`
+3. `AnalysisService.AnalyzeAsync` spawns `claude --print` via `ClaudeCliProcessor`, passes the analysis prompt, and parses the JSON response
+4. `NotificationService` shows a `NotificationWindow` (auto-closes after 8 s) on the UI thread via `Dispatcher.UIThread.Post`
 5. `PromptStorageService` saves a `PromptEntry` to SQLite at `%APPDATA%/enBot/lingua.db`
+
+### Request flow — Codex mode
+
+1. `CodexWatcherService` polls `~/.codex/sessions/rollout-*.jsonl` every 500 ms for new lines
+2. Lines with `type=event_msg` and `payload.type=user_message` are extracted and fire `OnRawPromptReceived`
+3. Steps 3–5 are identical to Claude mode, using `CodexCliProcessor` instead
 
 ### Key conventions
 
 - `ViewLocator.cs` auto-discovers Views from ViewModels by convention: replaces `"ViewModel"` suffix with `"View"` in the type name.
 - ViewModels inherit from `ViewModelBase` (which extends `CommunityToolkit.Mvvm.ObservableObject`).
 - Bindings use compiled bindings (`AvaloniaUseCompiledBindingsByDefault=true`) — binding paths are resolved at compile time.
-- `ClaudeAnalysisService` sets env var `ENBOT_ANALYSIS=1` when spawning the `claude` subprocess so hooks can detect and skip recursive invocations.
+- `ClaudeCliProcessor` sets env var `ENBOT_ANALYSIS=1` when spawning the `claude` subprocess so hooks can detect and skip recursive invocations.
 - `PromptStorageService` creates a new `AppDbContext` per operation (no shared context); DB is initialised via `EnsureCreatedAsync` (no migrations).
 - `Explanations` are stored in `PromptEntry.ExplanationsJson` as a serialised JSON string.
+- Inputs with fewer than 2 words are skipped entirely before hitting the AI (`AnalysisService`).
+- Non-English text returns `{"language": "--"}` from the AI and is silently ignored.
 
 ### Layer responsibilities
 
 - `Views/` — AXAML UI and code-behind (MainWindow, DashboardWindow, NotificationWindow, SettingsWindow)
 - `ViewModels/` — presentation logic; `DashboardViewModel` builds LiveCharts series from `PromptStorageService`
-- `Models/` — `HookPayload` (analysis result record), `PromptEntry` (EF Core entity), `RawPrompt`, `InlineSegment`
-- `Services/` — `HttpListenerService`, `ClaudeAnalysisService`, `NotificationService`, `PromptStorageService`
+- `Models/` — `AnalysisResult` (raw AI response), `HookPayload` (parsed analysis result), `PromptEntry` (EF Core entity), `RawPrompt`, `InlineSegment`
+- `Services/` — `HttpListenerService`, `CodexWatcherService`, `AnalysisService`, `NotificationService`, `PromptStorageService`, `AppSettingsService`, `AgentCliProcessorFactory`, `ClaudeCliProcessor`, `CodexCliProcessor`
 - `Data/` — `AppDbContext`, `AppDbContextFactory`
 - `Converters/` — value converters for score/complexity colours and bold/italic formatting
 
@@ -55,4 +67,4 @@ enBot is an Avalonia desktop tray app (.NET 10) following MVVM architecture via 
 - **LiveChartsCore.SkiaSharpView.Avalonia 2.0.0-rc6.1** — charts in DashboardWindow
 - **Fluent theme** with system theme variant auto-detection
 - **Nullable reference types** enabled
-- **Runtime dependency**: `claude` CLI must be on PATH for analysis to work
+- **Runtime dependency**: `claude` or `codex` CLI must be on PATH depending on the selected provider
