@@ -1,16 +1,16 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using enBot.Models;
 
 namespace enBot.Services;
 
 public class AppSettingsService
 {
     [JsonPropertyName("analysisProvider")]
-    public string AnalysisProvider { get; set; } = "claude";
+    public AnalysisProvider AnalysisProvider { get; set; } = AnalysisProvider.Claude;
 
     private static string SettingsFilePath
     {

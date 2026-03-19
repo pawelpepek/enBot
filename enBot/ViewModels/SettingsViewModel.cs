@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using enBot.Models;
 using enBot.Services;
 using System;
 using System.IO;
@@ -27,26 +28,26 @@ public partial class SettingsViewModel : ViewModelBase
         var provider = _appSettings.AnalysisProvider;
 
         // If saved provider is unavailable, fall back to whichever is available
-        if (provider == "claude" && !IsClaudeAvailable && IsCodexAvailable)
-            provider = "codex";
-        else if (provider == "codex" && !IsCodexAvailable && IsClaudeAvailable)
-            provider = "claude";
+        if (provider == AnalysisProvider.Claude && !IsClaudeAvailable && IsCodexAvailable)
+            provider = AnalysisProvider.Codex;
+        else if (provider == AnalysisProvider.Codex && !IsCodexAvailable && IsClaudeAvailable)
+            provider = AnalysisProvider.Claude;
 
-        _isClaudeSelected = provider == "claude" && IsClaudeAvailable;
-        _isCodexSelected = provider == "codex" && IsCodexAvailable;
+        _isClaudeSelected = provider == AnalysisProvider.Claude && IsClaudeAvailable;
+        _isCodexSelected = provider == AnalysisProvider.Codex && IsCodexAvailable;
     }
 
     partial void OnIsClaudeSelectedChanged(bool value)
     {
         if (!value) return;
-        _appSettings.AnalysisProvider = "claude";
+        _appSettings.AnalysisProvider = AnalysisProvider.Claude;
         _appSettings.Save();
     }
 
     partial void OnIsCodexSelectedChanged(bool value)
     {
         if (!value) return;
-        _appSettings.AnalysisProvider = "codex";
+        _appSettings.AnalysisProvider = AnalysisProvider.Codex;
         _appSettings.Save();
     }
 

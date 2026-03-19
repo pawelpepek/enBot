@@ -17,7 +17,7 @@ public class AnalysisService : IAnalysisService
         _processor = processor;
     }
 
-    public async Task<HookPayload> AnalyzeAsync(string original)
+    public async Task<HookPayload?> AnalyzeAsync(string original)
     {
         var wordCount = original.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
 
@@ -38,9 +38,12 @@ public class AnalysisService : IAnalysisService
             process.StandardInput.Close();
         }
 
-        string output = await process.StandardOutput.ReadToEndAsync().ConfigureAwait(false);
-        string stderr = await process.StandardError.ReadToEndAsync().ConfigureAwait(false);
+        var outputTask = process.StandardOutput.ReadToEndAsync();
+        var stderrTask = process.StandardError.ReadToEndAsync();
+        await Task.WhenAll(outputTask, stderrTask).ConfigureAwait(false);
         await process.WaitForExitAsync().ConfigureAwait(false);
+        string output = outputTask.Result;
+        string stderr = stderrTask.Result;
 
         var logPath = Path.Combine(Path.GetTempPath(), $"enBot_{ _processor.Name}.log");
         await File.WriteAllTextAsync(logPath,

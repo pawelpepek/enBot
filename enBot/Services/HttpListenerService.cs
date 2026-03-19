@@ -28,6 +28,21 @@ public class HttpListenerService : IDisposable
         _loopTask = Task.Run(ListenLoop);
     }
 
+    public void Stop()
+    {
+        _cts.Cancel();
+        try { _listener.Stop(); } catch { /* ignore */ }
+        try { _loopTask?.Wait(TimeSpan.FromSeconds(2)); } catch { /* ignore */ }
+    }
+
+    public void Dispose()
+    {
+        Stop();
+        _cts.Dispose();
+        _listener.Close();
+        _loopTask?.Dispose();
+    }
+
     private async Task ListenLoop()
     {
         try
@@ -92,18 +107,5 @@ public class HttpListenerService : IDisposable
         response.ContentLength64 = bytes.Length;
         await response.OutputStream.WriteAsync(bytes).ConfigureAwait(false);
         response.Close();
-    }
-
-    public void Stop()
-    {
-        _cts.Cancel();
-        try { _listener.Stop(); } catch { /* ignore */ }
-    }
-
-    public void Dispose()
-    {
-        Stop();
-        _cts.Dispose();
-        _listener.Close();
     }
 }

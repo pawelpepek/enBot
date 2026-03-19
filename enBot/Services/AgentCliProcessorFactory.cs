@@ -1,10 +1,12 @@
+using enBot.Models;
+
 namespace enBot.Services;
 
 public static class AgentCliProcessorFactory
 {
-    public static IAgentCliProcessor Create(string provider) => provider switch
+    public static IAgentCliProcessor Create(AnalysisProvider provider) => provider switch
     {
-        "codex" => new CodexCliProcessor(),
-        _       => new ClaudeCliProcessor()
+        AnalysisProvider.Codex => new CodexCliProcessor(),
+        _                      => new ClaudeCliProcessor()
     };
 }

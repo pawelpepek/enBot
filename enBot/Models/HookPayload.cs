@@ -24,7 +24,7 @@ public record HookPayload
     public int WordCount { get; init; }
 
     [JsonPropertyName("explanations")]
-    public List<string>? Explanations { get; init; }
+    public List<string> Explanations { get; init; } = [];
 
     [JsonPropertyName("hookVersion")]
     public string HookVersion { get; init; }

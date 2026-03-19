@@ -10,6 +10,14 @@ namespace enBot.Services;
 
 public class CodexWatcherService : IDisposable
 {
+    private record CodexEvent(
+        [property: JsonPropertyName("type")] string Type,
+        [property: JsonPropertyName("payload")] CodexPayload Payload);
+
+    private record CodexPayload(
+        [property: JsonPropertyName("type")] string Type,
+        [property: JsonPropertyName("message")] string Message);
+
     public Action<RawPrompt> OnRawPromptReceived { get; set; }
 
     private CancellationTokenSource _cts;
@@ -48,6 +56,8 @@ public class CodexWatcherService : IDisposable
         _cts?.Dispose();
         _cts = null;
     }
+
+    public void Dispose() => Stop();
 
     private void PollLoop(CancellationToken token)
     {
@@ -100,14 +110,4 @@ public class CodexWatcherService : IDisposable
         catch { }
         return null;
     }
-
-    public void Dispose() => Stop();
-
-    private record CodexEvent(
-        [property: JsonPropertyName("type")] string Type,
-        [property: JsonPropertyName("payload")] CodexPayload Payload);
-
-    private record CodexPayload(
-        [property: JsonPropertyName("type")] string Type,
-        [property: JsonPropertyName("message")] string Message);
 }

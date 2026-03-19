@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using enBot.Models;
+using System.Linq;
 
 namespace enBot.ViewModels;
 
@@ -42,11 +44,13 @@ public partial class DashboardViewModel : ViewModelBase
         IsLoading = true;
         try
         {
-            TotalPrompts = await _storageService.GetTotalPromptsAsync().ConfigureAwait(false);
-            AvgWeightedScore = Math.Round(await _storageService.GetAverageWeightedScoreAsync().ConfigureAwait(false), 1);
-            AvgWeightedComplexity = Math.Round(await _storageService.GetAverageWeightedComplexityAsync().ConfigureAwait(false), 1);
+            var promptsStatistics = await _storageService.GetAllStatsAsync().ConfigureAwait(false);
 
-            await BuildChartAsync().ConfigureAwait(false);
+            TotalPrompts = promptsStatistics.TotalPrompts;
+            AvgWeightedScore = Math.Round(promptsStatistics.AvgWeightedScore, 1);
+            AvgWeightedComplexity = Math.Round(promptsStatistics.AvgWeightedComplexity, 1);
+
+            await BuildChartAsync(promptsStatistics.DailyStatistics).ConfigureAwait(false);
         }
         finally
         {
@@ -54,22 +58,12 @@ public partial class DashboardViewModel : ViewModelBase
         }
     }
 
-    private async Task BuildChartAsync()
+    private async Task BuildChartAsync(List<DayPromptsStatistics> daysStatistics)
     {
-        var stats = await _storageService.GetAllDailyStatsAsync().ConfigureAwait(false);
-
-        var counts = new List<double>();
-        var scores = new List<double>();
-        var complexities = new List<double>();
-        var labels = new List<string>();
-
-        foreach (var s in stats)
-        {
-            counts.Add(s.Count);
-            scores.Add(Math.Round(s.AvgScore, 1));
-            complexities.Add(Math.Round(s.AvgComplexity, 1));
-            labels.Add(s.Date.ToString("MM/dd", CultureInfo.InvariantCulture));
-        }
+        var counts = daysStatistics.Select(s => (double)s.TotalPrompts).ToList();
+        var scores = daysStatistics.Select(s => Math.Round(s.AvgWeightedScore, 1)).ToList();
+        var complexities = daysStatistics.Select(s => Math.Round(s.AvgWeightedComplexity, 1)).ToList();
+        var labels = daysStatistics.Select(s => s.Date.ToString("MM/dd", CultureInfo.InvariantCulture)).ToList();
 
         var series = new List<ISeries>();
 
@@ -81,29 +75,19 @@ public partial class DashboardViewModel : ViewModelBase
                 Fill = new SolidColorPaint(SKColor.Parse("#5C6BC0"))
             });
 
-        series.Add(new LineSeries<double>
-        {
-            Name = "Avg Score",
-            Values = scores,
-            Fill = null,
-            Stroke = new SolidColorPaint(SKColor.Parse("#4CAF50")) { StrokeThickness = 2 },
-            GeometrySize = 6,
-            GeometryFill = new SolidColorPaint(SKColor.Parse("#4CAF50")),
-            GeometryStroke = null,
-            ScalesYAt = ShowPromptCounts ? 1 : 0
-        });
+        series.Add(
+            new LineSeriesBuilder("Avg Score")
+            .SetValues(scores)
+            .SetColors("#4CAF50", "#4CAF50")
+            .SetShowsYAt(ShowPromptCounts)
+            .Build());
 
-        series.Add(new LineSeries<double>
-        {
-            Name = "Avg Complexity",
-            Values = complexities,
-            Fill = null,
-            Stroke = new SolidColorPaint(SKColor.Parse("#FF9800")) { StrokeThickness = 2 },
-            GeometrySize = 6,
-            GeometryFill = new SolidColorPaint(SKColor.Parse("#FF9800")),
-            GeometryStroke = null,
-            ScalesYAt = ShowPromptCounts ? 1 : 0
-        });
+        series.Add(
+            new LineSeriesBuilder("Avg Complexity")
+            .SetValues(complexities)
+            .SetColors("#FF9800", "#FF9800")
+            .SetShowsYAt(ShowPromptCounts)
+            .Build());
 
         ChartSeries = [.. series];
 
