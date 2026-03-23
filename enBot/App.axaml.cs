@@ -61,16 +61,19 @@ public partial class App : Application
             _codexWatcherService = new CodexWatcherService();
             _codexWatcherService.OnRawPromptReceived = HandleRawPrompt;
 
-            if (settings.AnalysisProvider == AnalysisProvider.Codex &&
-                _analysisService is AnalysisService concreteAnalysisService)
-                concreteAnalysisService.OnBeforeSpawn = _codexWatcherService.SuppressNextNewFile;
-
             // Tray icon
-            var trayViewModel = new TrayViewModel(_storageService);
+            var trayViewModel = new TrayViewModel(
+                _storageService,
+                v => { if (v) _httpListenerService.Start(); else _httpListenerService.Stop(); },
+                v => { if (v) _codexWatcherService.Start(); else _codexWatcherService.Stop(); });
             SetupTrayIcon(trayViewModel);
 
             // Start services
-            desktop.Startup += (_, _) => { _httpListenerService.Start(); _codexWatcherService.Start(); };
+            desktop.Startup += (_, _) =>
+            {
+                if (settings.MonitorClaude) _httpListenerService.Start();
+                if (settings.MonitorCodex) _codexWatcherService.Start();
+            };
             desktop.Exit += (_, _) => { _httpListenerService.Stop(); _codexWatcherService.Stop(); };
         }
 

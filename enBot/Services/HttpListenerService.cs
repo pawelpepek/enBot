@@ -12,7 +12,7 @@ namespace enBot.Services;
 public class HttpListenerService : IDisposable
 {
     private readonly HttpListener _listener = new();
-    private readonly CancellationTokenSource _cts = new();
+    private CancellationTokenSource _cts;
     private Task _loopTask;
 
     public Action<RawPrompt> OnRawPromptReceived { get; set; }
@@ -24,13 +24,14 @@ public class HttpListenerService : IDisposable
 
     public void Start()
     {
+        _cts = new CancellationTokenSource();
         _listener.Start();
         _loopTask = Task.Run(ListenLoop);
     }
 
     public void Stop()
     {
-        _cts.Cancel();
+        _cts?.Cancel();
         try { _listener.Stop(); } catch { /* ignore */ }
         try { _loopTask?.Wait(TimeSpan.FromSeconds(2)); } catch { /* ignore */ }
     }
@@ -38,26 +39,27 @@ public class HttpListenerService : IDisposable
     public void Dispose()
     {
         Stop();
-        _cts.Dispose();
+        _cts?.Dispose();
         _listener.Close();
         _loopTask?.Dispose();
     }
 
     private async Task ListenLoop()
     {
+        var cts = _cts;
         try
         {
-            while (!_cts.IsCancellationRequested)
+            while (!cts.IsCancellationRequested)
             {
                 var context = await _listener.GetContextAsync().ConfigureAwait(false);
                 _ = HandleRequestAsync(context);
             }
         }
-        catch (HttpListenerException) when (_cts.IsCancellationRequested)
+        catch (HttpListenerException) when (cts.IsCancellationRequested)
         {
             // Expected on shutdown
         }
-        catch (ObjectDisposedException) when (_cts.IsCancellationRequested)
+        catch (ObjectDisposedException) when (cts.IsCancellationRequested)
         {
             // Expected on shutdown
         }

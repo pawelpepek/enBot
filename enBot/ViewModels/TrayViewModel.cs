@@ -1,16 +1,24 @@
 using Avalonia.Controls.ApplicationLifetimes;
 using enBot.Services;
 using enBot.Views;
+using System;
 
 namespace enBot.ViewModels;
 
 public class TrayViewModel
 {
     private readonly PromptStorageService _storageService;
+    private readonly Action<bool> _onClaudeMonitoringChanged;
+    private readonly Action<bool> _onCodexMonitoringChanged;
 
-    public TrayViewModel(PromptStorageService storageService)
+    public TrayViewModel(
+        PromptStorageService storageService,
+        Action<bool> onClaudeMonitoringChanged,
+        Action<bool> onCodexMonitoringChanged)
     {
         _storageService = storageService;
+        _onClaudeMonitoringChanged = onClaudeMonitoringChanged;
+        _onCodexMonitoringChanged = onCodexMonitoringChanged;
     }
 
     private DashboardWindow _dashboardWindow;
@@ -35,7 +43,7 @@ public class TrayViewModel
 
     public void OpenSettings()
     {
-        var vm = new SettingsViewModel();
+        var vm = new SettingsViewModel(_onClaudeMonitoringChanged, _onCodexMonitoringChanged);
         var window = new SettingsWindow { DataContext = vm };
         window.Show();
     }

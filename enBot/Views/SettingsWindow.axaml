@@ -4,52 +4,37 @@
         x:Class="enBot.Views.SettingsWindow"
         x:DataType="vm:SettingsViewModel"
         Title="enBot — Settings"
-        Width="560" Height="420"
+        Width="400" Height="280"
         CanResize="False">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="24" RowSpacing="12">
+    <StackPanel Margin="24" Spacing="16">
 
-        <TextBlock Grid.Row="0"
-                   Text="Install Hook"
+        <TextBlock Text="Managing Agents"
                    FontSize="16"
                    FontWeight="SemiBold"/>
 
-        <TextBlock Grid.Row="1"
-                   Text="Select a project folder to install the enBot hook. This will create .claude/hooks/index.js and register it in .claude/settings.json."
-                   TextWrapping="Wrap"
-                   Opacity="0.65"/>
-
-        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="8">
-            <TextBox Grid.Column="0"
-                     Text="{Binding SelectedFolder}"
-                     Watermark="Select project folder..."
-                     IsReadOnly="True"/>
-            <Button Grid.Column="1"
-                    Content="Browse..."
-                    x:Name="BrowseButton"/>
-        </Grid>
-
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8">
-            <Button Content="Install Hook"
-                    Command="{Binding InstallHookCommand}"/>
-            <Button Content="Install for User"
-                    Command="{Binding InstallForUserCommand}"/>
+        <StackPanel Spacing="8">
+            <CheckBox Content="Claude Code"
+                      IsChecked="{Binding IsClaudeMonitored}"/>
+            <TextBlock Text="Claude Code not found on PATH"
+                       FontSize="11"
+                       Opacity="0.55"
+                       IsVisible="{Binding !IsClaudeAvailable}"/>
+            <CheckBox Content="Codex"
+                      IsChecked="{Binding IsCodexMonitored}"/>
+            <TextBlock Text="Codex not found on PATH"
+                       FontSize="11"
+                       Opacity="0.55"
+                       IsVisible="{Binding !IsCodexAvailable}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="4"
-                   Text="{Binding StatusMessage}"
-                   Opacity="0.7"
-                   FontSize="12"
-                   TextWrapping="Wrap"/>
+        <Rectangle Height="1" Fill="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" Opacity="0.3"/>
 
-        <Rectangle Grid.Row="5" Height="1" Fill="{DynamicResource SystemControlForegroundBaseMediumLowBrush}" Opacity="0.3" Margin="0,4,0,0"/>
-
-        <TextBlock Grid.Row="6"
-                   Text="Analysis Provider"
+        <TextBlock Text="Analysis Provider"
                    FontSize="16"
                    FontWeight="SemiBold"/>
 
-        <StackPanel Grid.Row="7" Spacing="8">
+        <StackPanel Spacing="8">
             <RadioButton Content="Claude Code"
                          IsChecked="{Binding IsClaudeSelected}"
                          IsEnabled="{Binding IsClaudeAvailable}"
@@ -67,5 +52,6 @@
                        Opacity="0.55"
                        IsVisible="{Binding !IsCodexAvailable}"/>
         </StackPanel>
-    </Grid>
+
+    </StackPanel>
 </Window>

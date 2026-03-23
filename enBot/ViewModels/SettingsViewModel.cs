@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using enBot.Models;
 using enBot.Services;
 using System;
@@ -12,18 +11,23 @@ namespace enBot.ViewModels;
 
 public partial class SettingsViewModel : ViewModelBase
 {
-    [ObservableProperty] private string _selectedFolder = "";
-    [ObservableProperty] private string _statusMessage = "";
     public bool IsClaudeAvailable { get; } = AppSettingsService.IsClaudeAvailable();
     public bool IsCodexAvailable { get; } = AppSettingsService.IsCodexAvailable();
 
     [ObservableProperty] private bool _isClaudeSelected;
     [ObservableProperty] private bool _isCodexSelected;
+    [ObservableProperty] private bool _isClaudeMonitored;
+    [ObservableProperty] private bool _isCodexMonitored;
 
     private readonly AppSettingsService _appSettings;
+    private readonly Action<bool> _onClaudeMonitoringChanged;
+    private readonly Action<bool> _onCodexMonitoringChanged;
 
-    public SettingsViewModel()
+    public SettingsViewModel(Action<bool> onClaudeMonitoringChanged, Action<bool> onCodexMonitoringChanged)
     {
+        _onClaudeMonitoringChanged = onClaudeMonitoringChanged;
+        _onCodexMonitoringChanged = onCodexMonitoringChanged;
+
         _appSettings = AppSettingsService.Load();
         var provider = _appSettings.AnalysisProvider;
 
@@ -35,6 +39,9 @@ public partial class SettingsViewModel : ViewModelBase
 
         _isClaudeSelected = provider == AnalysisProvider.Claude && IsClaudeAvailable;
         _isCodexSelected = provider == AnalysisProvider.Codex && IsCodexAvailable;
+
+        _isClaudeMonitored = _appSettings.MonitorClaude;
+        _isCodexMonitored = _appSettings.MonitorCodex;
     }
 
     partial void OnIsClaudeSelectedChanged(bool value)
@@ -51,7 +58,23 @@ public partial class SettingsViewModel : ViewModelBase
         _appSettings.Save();
     }
 
-    private const string HookScript = """
+    partial void OnIsClaudeMonitoredChanged(bool value)
+    {
+        _appSettings.MonitorClaude = value;
+        _appSettings.Save();
+        _onClaudeMonitoringChanged(value);
+        if (value)
+            _ = InstallHookForUserAsync();
+    }
+
+    partial void OnIsCodexMonitoredChanged(bool value)
+    {
+        _appSettings.MonitorCodex = value;
+        _appSettings.Save();
+        _onCodexMonitoringChanged(value);
+    }
+
+    private static readonly string HookScript = """
         if (process.env.ENBOT_ANALYSIS) process.exit(0);
 
         let raw = "";
@@ -74,39 +97,18 @@ public partial class SettingsViewModel : ViewModelBase
         } catch { /* app not running */ }
         """;
 
-    [RelayCommand]
-    private async Task InstallHook()
-    {
-        if (string.IsNullOrWhiteSpace(SelectedFolder))
-        {
-            StatusMessage = "Please select a project folder first.";
-            return;
-        }
-
-        var command = "node .claude/hooks/index.js";
-        await InstallAsync(SelectedFolder, command, withPermissionsDeny: true).ConfigureAwait(false);
-        StatusMessage = $"Hook installed in {SelectedFolder}";
-    }
-
-    [RelayCommand]
-    private async Task InstallForUser()
+    private static async Task InstallHookForUserAsync()
     {
         var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var hookPath = Path.Combine(userProfile, ".claude", "hooks", "index.js").Replace('\\', '/');
         var command = $"node \"{hookPath}\"";
-        await InstallAsync(userProfile, command, withPermissionsDeny: false).ConfigureAwait(false);
-        StatusMessage = $"Hook installed for current user ({userProfile})";
-    }
 
-    private async Task InstallAsync(string targetFolder, string command, bool withPermissionsDeny)
-    {
-        var hooksDir = Path.Combine(targetFolder, ".claude", "hooks");
+        var hooksDir = Path.Combine(userProfile, ".claude", "hooks");
         Directory.CreateDirectory(hooksDir);
 
-        var indexJsPath = Path.Combine(hooksDir, "index.js");
-        await File.WriteAllTextAsync(indexJsPath, HookScript).ConfigureAwait(false);
+        await File.WriteAllTextAsync(Path.Combine(hooksDir, "index.js"), HookScript).ConfigureAwait(false);
 
-        var settingsPath = Path.Combine(targetFolder, ".claude", "settings.json");
+        var settingsPath = Path.Combine(userProfile, ".claude", "settings.json");
         var settingsText = File.Exists(settingsPath)
             ? await File.ReadAllTextAsync(settingsPath).ConfigureAwait(false)
             : "{}";
@@ -134,21 +136,9 @@ public partial class SettingsViewModel : ViewModelBase
 
         hooksObj["UserPromptSubmit"] = new JsonArray { hookEntry };
 
-        if (withPermissionsDeny)
-        {
-            if (settings["permissions"] is not JsonObject permObj)
-            {
-                permObj = new JsonObject();
-                settings["permissions"] = permObj;
-            }
-
-            permObj["deny"] = new JsonArray
-            {
-                "Bash(*)", "Edit(*)", "Write(*)", "MultiEdit(*)", "NotebookEdit(*)"
-            };
-        }
-
-        var json = settings.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
-        await File.WriteAllTextAsync(settingsPath, json).ConfigureAwait(false);
+        await File.WriteAllTextAsync(
+            settingsPath,
+            settings.ToJsonString(new JsonSerializerOptions { WriteIndented = true }))
+            .ConfigureAwait(false);
     }
 }

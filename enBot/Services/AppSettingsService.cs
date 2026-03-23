@@ -12,6 +12,12 @@ public class AppSettingsService
     [JsonPropertyName("analysisProvider")]
     public AnalysisProvider AnalysisProvider { get; set; } = AnalysisProvider.Claude;
 
+    [JsonPropertyName("monitorClaude")]
+    public bool MonitorClaude { get; set; } = false;
+
+    [JsonPropertyName("monitorCodex")]
+    public bool MonitorCodex { get; set; } = false;
+
     private static string SettingsFilePath
     {
         get
