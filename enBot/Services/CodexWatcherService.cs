@@ -18,6 +18,13 @@ public class CodexWatcherService : IDisposable
         [property: JsonPropertyName("type")] string Type,
         [property: JsonPropertyName("message")] string Message);
 
+    private record SessionMetaLine(
+        [property: JsonPropertyName("type")] string Type,
+        [property: JsonPropertyName("payload")] SessionMetaPayload Payload);
+
+    private record SessionMetaPayload(
+        [property: JsonPropertyName("originator")] string Originator);
+
     public Action<RawPrompt> OnRawPromptReceived { get; set; }
 
     private CancellationTokenSource _cts;
@@ -79,7 +86,18 @@ public class CodexWatcherService : IDisposable
         try
         {
             using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            var startPos = _filePositions.GetValueOrDefault(path, 0);
+
+            if (!_filePositions.TryGetValue(path, out var startPos))
+            {
+                if (IsCodexExecSession(fs))
+                {
+                    _filePositions[path] = fs.Length;
+                    return;
+                }
+                fs.Seek(0, SeekOrigin.Begin);
+                startPos = 0;
+            }
+
             if (fs.Length <= startPos) return;
 
             fs.Seek(startPos, SeekOrigin.Begin);
@@ -94,6 +112,19 @@ public class CodexWatcherService : IDisposable
             _filePositions[path] = fs.Position;
         }
         catch { }
+    }
+
+    private static bool IsCodexExecSession(FileStream fs)
+    {
+        try
+        {
+            using var reader = new StreamReader(fs, leaveOpen: true);
+            var firstLine = reader.ReadLine();
+            if (firstLine is null) return false;
+            var meta = JsonSerializer.Deserialize<SessionMetaLine>(firstLine);
+            return meta?.Type == "session_meta" && meta.Payload?.Originator == "codex_exec";
+        }
+        catch { return false; }
     }
 
     private static string TryParseUserMessage(string line)

@@ -61,6 +61,10 @@ public partial class App : Application
             _codexWatcherService = new CodexWatcherService();
             _codexWatcherService.OnRawPromptReceived = HandleRawPrompt;
 
+            if (settings.AnalysisProvider == AnalysisProvider.Codex &&
+                _analysisService is AnalysisService concreteAnalysisService)
+                concreteAnalysisService.OnBeforeSpawn = _codexWatcherService.SuppressNextNewFile;
+
             // Tray icon
             var trayViewModel = new TrayViewModel(_storageService);
             SetupTrayIcon(trayViewModel);

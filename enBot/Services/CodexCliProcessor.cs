@@ -11,7 +11,7 @@ public class CodexCliProcessor : IAgentCliProcessor
 
     public ProcessStartInfo GetProcessStartInfo(string prompt)
     {
-        return new ProcessStartInfo(
+        var psi = new ProcessStartInfo(
             Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "npm",
@@ -26,5 +26,6 @@ public class CodexCliProcessor : IAgentCliProcessor
             StandardErrorEncoding = Encoding.UTF8,
             StandardOutputEncoding = Encoding.UTF8
         };
+        return psi;
     }
 }

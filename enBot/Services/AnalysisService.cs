@@ -17,7 +17,7 @@ public class AnalysisService : IAnalysisService
         _processor = processor;
     }
 
-    public async Task<HookPayload?> AnalyzeAsync(string original)
+    public async Task<HookPayload> AnalyzeAsync(string original)
     {
         var wordCount = original.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
 
@@ -28,6 +28,7 @@ public class AnalysisService : IAnalysisService
             """;
 
         var psi = _processor.GetProcessStartInfo(analysisPrompt);
+        psi.Environment["ENBOT_ANALYSIS"] = "1";
 
         using var process = Process.Start(psi);
         if (process is null) return null;

@@ -19,7 +19,6 @@ public class ClaudeCliProcessor : IAgentCliProcessor
             StandardErrorEncoding = System.Text.Encoding.UTF8
         };
         psi.ArgumentList.Add("--print");
-        psi.Environment["ENBOT_ANALYSIS"] = "1";
         return psi;
     }
 }
