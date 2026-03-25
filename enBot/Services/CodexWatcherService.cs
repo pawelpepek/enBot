@@ -29,8 +29,12 @@ public class CodexWatcherService : IDisposable
 
     private CancellationTokenSource _cts;
     private readonly Dictionary<string, long> _filePositions = new();
+    private readonly HashSet<string> _ownExecSessions = new();
+    // Files whose session_meta wasn't readable yet; value = retry count
+    private readonly Dictionary<string, int> _pendingNewFiles = new();
     private readonly string _sessionsRoot;
     private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(500);
+    private const int MaxPendingRetries = 20; // 10 s at 500 ms/poll
 
     public CodexWatcherService()
     {
@@ -86,19 +90,31 @@ public class CodexWatcherService : IDisposable
 
     private void ReadNewLines(string path)
     {
+        if (IsBlacklistedExecSession(path)) return;
+
         try
         {
             using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
             if (!_filePositions.TryGetValue(path, out var startPos))
             {
-                if (IsCodexExecSession(fs))
+                var isExec = TryIsCodexExecSession(fs);
+
+                if (isExec == null)
                 {
-                    _filePositions[path] = fs.Length;
+                    if (DeferUntilSessionMetaIsReady(path)) return;
+                    LogService.Log($"[Codex] Gave up waiting for session_meta, treating as user session: {Path.GetFileName(path)}");
+                }
+
+                _pendingNewFiles.Remove(path);
+
+                if (isExec == true)
+                {
+                    BlacklistExecSession(path);
                     return;
                 }
-                fs.Seek(0, SeekOrigin.Begin);
-                startPos = 0;
+
+                SeekToBeginningOfUserSession(fs, out startPos);
             }
 
             if (fs.Length <= startPos) return;
@@ -123,17 +139,43 @@ public class CodexWatcherService : IDisposable
         }
     }
 
-    private static bool IsCodexExecSession(FileStream fs)
+    private bool IsBlacklistedExecSession(string path) =>
+        _ownExecSessions.Contains(path);
+
+    private bool DeferUntilSessionMetaIsReady(string path)
+    {
+        _pendingNewFiles.TryGetValue(path, out var retries);
+        if (retries >= MaxPendingRetries) return false;
+        _pendingNewFiles[path] = retries + 1;
+        LogService.Log($"[Codex] New file, session_meta not ready yet (retry {retries + 1}): {Path.GetFileName(path)}");
+        return true;
+    }
+
+    private void BlacklistExecSession(string path)
+    {
+        _ownExecSessions.Add(path);
+        LogService.Log($"[Codex] Blacklisted own exec session: {Path.GetFileName(path)}");
+    }
+
+    private static void SeekToBeginningOfUserSession(FileStream fs, out long startPos)
+    {
+        fs.Seek(0, SeekOrigin.Begin);
+        startPos = 0;
+    }
+
+    // Returns true = enBot's exec session (skip), false = user session (process), null = not readable yet (defer)
+    private static bool? TryIsCodexExecSession(FileStream fs)
     {
         try
         {
             using var reader = new StreamReader(fs, leaveOpen: true);
             var firstLine = reader.ReadLine();
-            if (firstLine is null) return false;
+            if (string.IsNullOrEmpty(firstLine)) return null;
             var meta = JsonSerializer.Deserialize<SessionMetaLine>(firstLine);
-            return meta?.Type == "session_meta" && meta.Payload?.Originator == "codex_exec";
+            if (meta?.Type != "session_meta") return null;
+            return meta.Payload?.Originator == "codex_exec";
         }
-        catch { return false; }
+        catch { return null; }
     }
 
     private static string TryParseUserMessage(string line)
