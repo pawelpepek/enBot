@@ -25,18 +25,45 @@ enBot is a Windows system tray application that watches your AI coding agent ses
 
 ### Claude Code hook
 
-Add the following to your Claude Code hook configuration so that every prompt is forwarded to enBot:
+The easiest way is to click **Install Hook** in the Settings window — enBot will write the hook script and update your Claude Code configuration automatically.
+
+To set it up manually, create `~/.claude/hooks/index.js`:
+
+```js
+if (process.env.ENBOT_ANALYSIS) process.exit(0);
+
+let raw = "";
+for await (const chunk of process.stdin) raw += chunk;
+
+let data;
+try { data = JSON.parse(raw); } catch { process.exit(0); }
+
+const prompt = (data.prompt ?? "").trim();
+const wordCount = prompt.split(/\s+/).filter(Boolean).length;
+if (wordCount <= 1) process.exit(0);
+
+try {
+  await fetch("http://localhost:5151/hook", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ original: prompt }),
+    signal: AbortSignal.timeout(5000),
+  });
+} catch { /* app not running */ }
+```
+
+Then register it in `~/.claude/settings.json`:
 
 ```json
 {
   "hooks": {
-    "PreToolUse": [
+    "UserPromptSubmit": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "curl -s -X POST http://localhost:5151/hook -H \"Content-Type: application/json\" -d \"{\\\"original\\\": \\\"$CLAUDE_TOOL_INPUT\\\"}\" || true"
+            "command": "node \"~/.claude/hooks/index.js\""
           }
         ]
       }
