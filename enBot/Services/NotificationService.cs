@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Threading;
 using enBot.Models;
 using enBot.ViewModels;
@@ -20,12 +21,20 @@ public class NotificationService
     {
         Dispatcher.UIThread.Post(() =>
         {
-            _current?.Close();
-            var vm = new NotificationViewModel(payload);
-            _current = new NotificationWindow { DataContext = vm };
-            _current.Closed += (_, _) => _current = null;
-            _current.Show();
-            _current.StartAutoClose(_autoCloseSeconds);
+            try
+            {
+                _current?.Close();
+                var vm = new NotificationViewModel(payload);
+                _current = new NotificationWindow { DataContext = vm };
+                _current.Closed += (_, _) => _current = null;
+                _current.Show();
+                _current.StartAutoClose(_autoCloseSeconds);
+                LogService.Log("[Notification] Window shown");
+            }
+            catch (Exception ex)
+            {
+                LogService.Log("[Notification] Failed to show window", ex);
+            }
         });
     }
 }

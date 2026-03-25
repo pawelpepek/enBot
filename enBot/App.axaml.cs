@@ -82,17 +82,25 @@ public partial class App : Application
 
     private void HandleRawPrompt(RawPrompt rawPrompt)
     {
+        LogService.Log($"[Pipeline] Prompt received ({rawPrompt.Original.Length} chars)");
         _ = Task.Run(async () =>
         {
             try
             {
                 var payload = await _analysisService!.AnalyzeAsync(rawPrompt.Original).ConfigureAwait(false);
-                if (payload is null) return;
+                if (payload is null)
+                {
+                    LogService.Log("[Pipeline] AnalyzeAsync returned null — no notification");
+                    return;
+                }
+                LogService.Log($"[Pipeline] Showing notification score={payload.Score}");
                 _notificationService!.Show(payload);
                 await _storageService!.SavePromptAsync(payload).ConfigureAwait(false);
+                LogService.Log("[Pipeline] Saved to storage");
             }
             catch (Exception ex)
             {
+                LogService.Log("[Pipeline] Unhandled exception", ex);
                 var logPath = Path.Combine(Path.GetTempPath(), "enBot_storage_error.log");
                 await File.AppendAllTextAsync(logPath, $"[{DateTime.UtcNow:O}] {ex}\n\n").ConfigureAwait(false);
             }

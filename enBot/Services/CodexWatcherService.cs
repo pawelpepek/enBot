@@ -75,7 +75,10 @@ public class CodexWatcherService : IDisposable
                 foreach (var file in Directory.GetFiles(_sessionsRoot, "rollout-*.jsonl", SearchOption.AllDirectories))
                     ReadNewLines(file);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogService.Log("[Codex] PollLoop exception", ex);
+            }
 
             token.WaitHandle.WaitOne(PollInterval);
         }
@@ -107,11 +110,17 @@ public class CodexWatcherService : IDisposable
             {
                 var message = TryParseUserMessage(line);
                 if (message is not null)
+                {
+                    LogService.Log($"[Codex] User message detected in {Path.GetFileName(path)}");
                     OnRawPromptReceived?.Invoke(new RawPrompt { Original = message });
+                }
             }
             _filePositions[path] = fs.Position;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            LogService.Log($"[Codex] ReadNewLines exception for {Path.GetFileName(path)}", ex);
+        }
     }
 
     private static bool IsCodexExecSession(FileStream fs)
