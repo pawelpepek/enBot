@@ -83,7 +83,7 @@ public class AnalysisService : IAnalysisService
             return null;
         }
 
-        var noCorrection = string.IsNullOrEmpty(result.Corrected) || result.Corrected.Trim() == result.Corrected.Trim();
+        var noCorrection = string.IsNullOrEmpty(result.Corrected) || result.Corrected.Trim() == original.Trim();
 
         var payload = new HookPayload
         {
