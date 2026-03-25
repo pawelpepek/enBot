@@ -18,7 +18,8 @@ public partial class NotificationViewModel : ViewModelBase
 
     public NotificationViewModel(HookPayload payload)
     {
-        OriginalInlines = ParseCorrected(string.IsNullOrEmpty(payload.DisplayOriginal) ? payload.Original : payload.DisplayOriginal);
+        var displayOriginal = string.IsNullOrEmpty(payload.DisplayOriginal) ? payload.Original : payload.DisplayOriginal;
+        OriginalInlines = ParseCorrected(displayOriginal);
         CorrectedInlines = ParseCorrected(payload.Corrected);
         Score = payload.Score;
         ScoreText = $"{payload.Score}/10";
@@ -29,30 +30,29 @@ public partial class NotificationViewModel : ViewModelBase
         HasExplanations = Explanations.Count > 0;
     }
 
-    private static List<InlineSegment> ParseCorrected(string corrected)
+    private static List<InlineSegment> ParseCorrected(string text)
     {
         var segments = new List<InlineSegment>();
-        // Match **bold** first, then *italic* (single asterisks, not preceded/followed by another *)
         var pattern = @"\*\*(.+?)\*\*|\*(?!\*)(.+?)(?<!\*)\*";
         var lastIndex = 0;
 
-        corrected = corrected.Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ');
+        text = text.Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ');
 
-        foreach (Match match in Regex.Matches(corrected, pattern))
+        foreach (Match match in Regex.Matches(text, pattern))
         {
             if (match.Index > lastIndex)
-                AddWords(segments, corrected[lastIndex..match.Index]);
+                AddWords(segments, text[lastIndex..match.Index]);
 
             if (match.Value.StartsWith("**"))
                 segments.Add(new InlineSegment(match.Groups[1].Value + " ", IsBold: true));
             else
-                segments.Add(new InlineSegment(match.Groups[2].Value + " ", IsBold: true, IsItalic: true));
+                segments.Add(new InlineSegment(match.Groups[2].Value + " ", IsBold: false, IsItalic: true));
 
             lastIndex = match.Index + match.Length;
         }
 
-        if (lastIndex < corrected.Length)
-            AddWords(segments, corrected[lastIndex..]);
+        if (lastIndex < text.Length)
+            AddWords(segments, text[lastIndex..]);
 
         return segments;
     }
