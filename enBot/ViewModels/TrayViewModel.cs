@@ -22,6 +22,7 @@ public class TrayViewModel
     }
 
     private DashboardWindow _dashboardWindow;
+    private SettingsWindow _settingsWindow;
 
     public void OpenDashboard()
     {
@@ -43,9 +44,20 @@ public class TrayViewModel
 
     public void OpenSettings()
     {
+        if (_settingsWindow != null)
+        {
+            if (_settingsWindow.WindowState == Avalonia.Controls.WindowState.Minimized)
+                _settingsWindow.WindowState = Avalonia.Controls.WindowState.Normal;
+            _settingsWindow.Topmost = true;
+            _settingsWindow.Activate();
+            _settingsWindow.Topmost = false;
+            return;
+        }
+
         var vm = new SettingsViewModel(_onClaudeMonitoringChanged, _onCodexMonitoringChanged);
-        var window = new SettingsWindow { DataContext = vm };
-        window.Show();
+        _settingsWindow = new SettingsWindow { DataContext = vm };
+        _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+        _settingsWindow.Show();
     }
 
     public void Exit()
