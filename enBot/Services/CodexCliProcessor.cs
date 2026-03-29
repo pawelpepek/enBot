@@ -17,8 +17,9 @@ public class CodexCliProcessor : IAgentCliProcessor
                 "npm",
                 "codex.cmd"
             ),
-            $"exec --sandbox read-only --skip-git-repo-check \"{prompt}\"")
+            "exec --sandbox read-only --skip-git-repo-check -")
         {
+            RedirectStandardInput = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,

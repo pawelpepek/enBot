@@ -41,7 +41,7 @@ public class PromptSuggestionService
 
         var suggestion = new PromptSuggestion
         {
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.Now,
             SuggestionText = result?.Sentence ?? output,
             ExplanationText = result?.Explanation ?? ""
         };

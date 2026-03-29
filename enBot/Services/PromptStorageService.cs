@@ -54,7 +54,7 @@ public class PromptStorageService
             ExplanationsJson = payload.Explanations is { Count: > 0 }
                 ? JsonSerializer.Serialize(payload.Explanations)
                 : null,
-            ReceivedAt = DateTime.UtcNow
+            ReceivedAt = DateTime.Now
         };
         ctx.PromptEntries.Add(entry);
         await ctx.SaveChangesAsync().ConfigureAwait(false);
