@@ -16,7 +16,7 @@ namespace enBot.ViewModels;
 
 public partial class DashboardViewModel : ViewModelBase
 {
-    private readonly PromptStorageService _storageService;
+    private readonly AppRepository _storageService;
 
     [ObservableProperty] private int _totalPrompts;
     [ObservableProperty] private double _avgWeightedScore;
@@ -28,7 +28,7 @@ public partial class DashboardViewModel : ViewModelBase
     [ObservableProperty] private Axis[] _chartXAxes = [];
     [ObservableProperty] private Axis[] _chartYAxes = [];
 
-    public DashboardViewModel(PromptStorageService storageService)
+    public DashboardViewModel(AppRepository storageService)
     {
         _storageService = storageService;
         _ = LoadDataAsync();

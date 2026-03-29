@@ -22,12 +22,12 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty] private decimal _suggestionInterval;
 
     private readonly AppSettingsService _appSettings;
-    private readonly PromptStorageService _storageService;
+    private readonly AppRepository _storageService;
     private readonly Action<bool> _onClaudeMonitoringChanged;
     private readonly Action<bool> _onCodexMonitoringChanged;
 
     public SettingsViewModel(
-        PromptStorageService storageService,
+        AppRepository storageService,
         Action<bool> onClaudeMonitoringChanged,
         Action<bool> onCodexMonitoringChanged)
     {

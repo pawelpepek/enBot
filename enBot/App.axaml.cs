@@ -22,7 +22,7 @@ public partial class App : Application
     private HttpListenerService _httpListenerService;
     private CodexWatcherService _codexWatcherService;
     private NotificationService _notificationService;
-    private PromptStorageService _storageService;
+    private AppRepository _storageService;
     private IAnalysisService _analysisService;
     private PromptSuggestionService _promptSuggestionService;
     private ReportService _reportService;
@@ -49,7 +49,7 @@ public partial class App : Application
                 .UseSqlite($"Data Source={dbPath}")
                 .Options;
 
-            _storageService = new PromptStorageService(options);
+            _storageService = new AppRepository(options);
             _ = _storageService.InitializeAsync();
 
             // Services

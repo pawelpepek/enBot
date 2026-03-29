@@ -11,7 +11,7 @@ public class MainViewModel : ViewModelBase
     public SettingsViewModel Settings { get; }
 
     public MainViewModel(
-        PromptStorageService storageService,
+        AppRepository storageService,
         PromptSuggestionService suggestionService,
         ReportService reportService,
         Action<bool> onClaudeMonitoringChanged,

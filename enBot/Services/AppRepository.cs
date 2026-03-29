@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace enBot.Services;
 
-public class PromptStorageService
+public class AppRepository
 {
     private readonly DbContextOptions<AppDbContext> _options;
 
-    public PromptStorageService(DbContextOptions<AppDbContext> options)
+    public AppRepository(DbContextOptions<AppDbContext> options)
     {
         _options = options;
     }

@@ -8,10 +8,10 @@ namespace enBot.Services;
 
 public class ReportService
 {
-    private readonly PromptStorageService _storage;
+    private readonly AppRepository _storage;
     private readonly AgentCliRunner _runner;
 
-    public ReportService(PromptStorageService storage, IAgentCliProcessor processor)
+    public ReportService(AppRepository storage, IAgentCliProcessor processor)
     {
         _storage = storage;
         _runner = new AgentCliRunner(processor);

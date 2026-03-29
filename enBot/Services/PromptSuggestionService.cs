@@ -9,10 +9,10 @@ namespace enBot.Services;
 
 public class PromptSuggestionService
 {
-    private readonly PromptStorageService _storage;
+    private readonly AppRepository _storage;
     private readonly AgentCliRunner _runner;
 
-    public PromptSuggestionService(PromptStorageService storage, IAgentCliProcessor processor)
+    public PromptSuggestionService(AppRepository storage, IAgentCliProcessor processor)
     {
         _storage = storage;
         _runner = new AgentCliRunner(processor);

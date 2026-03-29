@@ -8,14 +8,14 @@ namespace enBot.ViewModels;
 
 public class TrayViewModel
 {
-    private readonly PromptStorageService _storageService;
+    private readonly AppRepository _storageService;
     private readonly PromptSuggestionService _suggestionService;
     private readonly ReportService _reportService;
     private readonly Action<bool> _onClaudeMonitoringChanged;
     private readonly Action<bool> _onCodexMonitoringChanged;
 
     public TrayViewModel(
-        PromptStorageService storageService,
+        AppRepository storageService,
         PromptSuggestionService suggestionService,
         ReportService reportService,
         Action<bool> onClaudeMonitoringChanged,
