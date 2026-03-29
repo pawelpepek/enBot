@@ -1,0 +1,94 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:enBot.ViewModels"
+        xmlns:models="using:enBot.Models"
+        x:Class="enBot.Views.PromptSuggestionsWindow"
+        x:DataType="vm:PromptSuggestionsViewModel"
+        Title="enBot — Prompt Suggestions"
+        Width="700" Height="500"
+        MinWidth="500" MinHeight="300">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                Padding="20,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Prompt Suggestions"
+                           FontSize="16" FontWeight="SemiBold"
+                           VerticalAlignment="Center"/>
+                <Button Grid.Column="1"
+                        Content="Refresh"
+                        Command="{Binding RefreshCommand}"
+                        IsEnabled="{Binding !IsLoading}"/>
+            </Grid>
+        </Border>
+
+        <!-- Content -->
+        <Grid Grid.Row="1">
+
+            <TextBlock Text="Loading…"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontSize="14" Opacity="0.6"
+                       IsVisible="{Binding IsLoading}"/>
+
+            <TextBlock Text="No suggestions yet. Click Generate Suggestion to get started."
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontSize="13" Opacity="0.5"
+                       IsVisible="{Binding IsEmpty}"/>
+
+            <ScrollViewer IsVisible="{Binding !IsLoading}" Padding="12">
+                <ItemsControl ItemsSource="{Binding Suggestions}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:PromptSuggestion">
+                            <Border Margin="0,0,0,6" Padding="12,10"
+                                    BorderThickness="0,0,0,1"
+                                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock FontSize="11" Opacity="0.55">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0:dd MMM yyyy HH:mm}">
+                                                <Binding Path="CreatedAt"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                    <SelectableTextBlock Text="{Binding SuggestionText}"
+                                                         TextWrapping="Wrap"
+                                                         FontSize="14"
+                                                         FontWeight="SemiBold"/>
+                                    <SelectableTextBlock Text="{Binding ExplanationText}"
+                                                         TextWrapping="Wrap"
+                                                         FontSize="12"
+                                                         Opacity="0.65"
+                                                         IsVisible="{Binding ExplanationText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+        </Grid>
+
+        <!-- Action bar -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                Padding="20,10">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Generating suggestion…"
+                           FontSize="12" Opacity="0.7"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding IsGenerating}"/>
+                <Button Grid.Column="1"
+                        Content="Generate Suggestion"
+                        Command="{Binding GenerateSuggestionCommand}"
+                        IsEnabled="{Binding !IsGenerating}"
+                        FontWeight="SemiBold"/>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

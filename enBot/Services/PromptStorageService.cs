@@ -2,6 +2,7 @@ using enBot.Data;
 using enBot.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -23,6 +24,20 @@ public class PromptStorageService
     {
         await using var ctx = CreateContext();
         await ctx.Database.EnsureCreatedAsync().ConfigureAwait(false);
+        await ctx.Database.ExecuteSqlRawAsync("""
+            CREATE TABLE IF NOT EXISTS "PromptSuggestions" (
+                "Id" INTEGER NOT NULL CONSTRAINT "PK_PromptSuggestions" PRIMARY KEY AUTOINCREMENT,
+                "CreatedAt" TEXT NOT NULL,
+                "SuggestionText" TEXT NOT NULL,
+                "ExplanationText" TEXT NOT NULL DEFAULT ''
+            )
+            """).ConfigureAwait(false);
+        await ctx.Database.ExecuteSqlRawAsync("""
+            CREATE TABLE IF NOT EXISTS "AppState" (
+                "Key" INTEGER NOT NULL CONSTRAINT "PK_AppState" PRIMARY KEY,
+                "Value" INTEGER NOT NULL DEFAULT 0
+            )
+            """).ConfigureAwait(false);
     }
 
     public async Task SavePromptAsync(HookPayload payload)
@@ -42,6 +57,52 @@ public class PromptStorageService
             ReceivedAt = DateTime.UtcNow
         };
         ctx.PromptEntries.Add(entry);
+        await ctx.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async Task<List<PromptEntry>> GetLastPromptsAsync(int count)
+    {
+        await using var ctx = CreateContext();
+        return await ctx.PromptEntries
+            .OrderByDescending(e => e.Id)
+            .Take(count)
+            .ToListAsync()
+            .ConfigureAwait(false);
+    }
+
+
+    public async Task<List<PromptSuggestion>> GetRecentSuggestionsAsync(int count)
+    {
+        await using var ctx = CreateContext();
+        return await ctx.PromptSuggestions
+            .OrderByDescending(s => s.Id)
+            .Take(count)
+            .ToListAsync()
+            .ConfigureAwait(false);
+    }
+
+    public async Task SaveSuggestionAsync(PromptSuggestion suggestion)
+    {
+        await using var ctx = CreateContext();
+        ctx.PromptSuggestions.Add(suggestion);
+        await ctx.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async Task<int> GetStateAsync(AppStateKey key)
+    {
+        await using var ctx = CreateContext();
+        var entry = await ctx.AppState.FindAsync(key).ConfigureAwait(false);
+        return entry?.Value ?? 0;
+    }
+
+    public async Task SetStateAsync(AppStateKey key, int value)
+    {
+        await using var ctx = CreateContext();
+        var entry = await ctx.AppState.FindAsync(key).ConfigureAwait(false);
+        if (entry is null)
+            ctx.AppState.Add(new AppStateEntry { Key = key, Value = value });
+        else
+            entry.Value = value;
         await ctx.SaveChangesAsync().ConfigureAwait(false);
     }
 

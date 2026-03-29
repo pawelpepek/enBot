@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="enBot.Views.SuggestionNotificationWindow"
+        Width="420"
+        SizeToContent="Height"
+        ShowInTaskbar="False"
+        Topmost="True"
+        CanResize="False"
+        ShowActivated="False"
+        SystemDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="AcrylicBlur, Blur, None">
+
+    <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+            CornerRadius="10"
+            BoxShadow="0 4 20 0 #40000000">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto" Margin="16">
+
+            <!-- Header -->
+            <TextBlock Grid.Row="0"
+                       Text="Prompt Suggestion"
+                       FontWeight="Bold"
+                       FontSize="15"/>
+
+            <!-- Suggestion text -->
+            <TextBlock Grid.Row="1"
+                       x:Name="SuggestionTextBlock"
+                       TextWrapping="Wrap"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Margin="0,10,0,0"
+                       MaxWidth="388"/>
+
+            <!-- Explanation text -->
+            <TextBlock Grid.Row="2"
+                       x:Name="ExplanationTextBlock"
+                       TextWrapping="Wrap"
+                       FontSize="12"
+                       Opacity="0.65"
+                       Margin="0,6,0,0"
+                       MaxWidth="388"/>
+
+            <!-- Footer -->
+            <Grid Grid.Row="3" Margin="0,12,0,0" ColumnDefinitions="*,Auto">
+                <Button Grid.Column="1"
+                        Content="Close"
+                        Padding="12,4"
+                        x:Name="CloseButton"/>
+            </Grid>
+
+        </Grid>
+    </Border>
+</Window>

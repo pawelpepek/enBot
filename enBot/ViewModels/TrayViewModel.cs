@@ -8,21 +8,25 @@ namespace enBot.ViewModels;
 public class TrayViewModel
 {
     private readonly PromptStorageService _storageService;
+    private readonly PromptSuggestionService _suggestionService;
     private readonly Action<bool> _onClaudeMonitoringChanged;
     private readonly Action<bool> _onCodexMonitoringChanged;
 
     public TrayViewModel(
         PromptStorageService storageService,
+        PromptSuggestionService suggestionService,
         Action<bool> onClaudeMonitoringChanged,
         Action<bool> onCodexMonitoringChanged)
     {
         _storageService = storageService;
+        _suggestionService = suggestionService;
         _onClaudeMonitoringChanged = onClaudeMonitoringChanged;
         _onCodexMonitoringChanged = onCodexMonitoringChanged;
     }
 
     private DashboardWindow _dashboardWindow;
     private SettingsWindow _settingsWindow;
+    private PromptSuggestionsWindow _promptSuggestionsWindow;
 
     public void OpenDashboard()
     {
@@ -58,6 +62,24 @@ public class TrayViewModel
         _settingsWindow = new SettingsWindow { DataContext = vm };
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
+    }
+
+    public void OpenPromptSuggestions()
+    {
+        if (_promptSuggestionsWindow != null)
+        {
+            if (_promptSuggestionsWindow.WindowState == Avalonia.Controls.WindowState.Minimized)
+                _promptSuggestionsWindow.WindowState = Avalonia.Controls.WindowState.Normal;
+            _promptSuggestionsWindow.Topmost = true;
+            _promptSuggestionsWindow.Activate();
+            _promptSuggestionsWindow.Topmost = false;
+            return;
+        }
+
+        var vm = new PromptSuggestionsViewModel(_suggestionService);
+        _promptSuggestionsWindow = new PromptSuggestionsWindow { DataContext = vm };
+        _promptSuggestionsWindow.Closed += (_, _) => _promptSuggestionsWindow = null;
+        _promptSuggestionsWindow.Show();
     }
 
     public void Exit()

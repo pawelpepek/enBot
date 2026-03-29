@@ -18,11 +18,13 @@ namespace enBot;
 
 public partial class App : Application
 {
+    private const int AutoCloseSeconds = 30;
     private HttpListenerService _httpListenerService;
     private CodexWatcherService _codexWatcherService;
     private NotificationService _notificationService;
     private PromptStorageService _storageService;
     private IAnalysisService _analysisService;
+    private PromptSuggestionService _promptSuggestionService;
     private TrayIcon _trayIcon;
 
     public override void Initialize()
@@ -54,6 +56,7 @@ public partial class App : Application
             var settings = AppSettingsService.Load();
             var processor = AgentCliProcessorFactory.Create(settings.AnalysisProvider);
             _analysisService = new AnalysisService(processor);
+            _promptSuggestionService = new PromptSuggestionService(_storageService, processor);
 
             _httpListenerService = new HttpListenerService("http://localhost:5151/");
             _httpListenerService.OnRawPromptReceived = HandleRawPrompt;
@@ -64,6 +67,7 @@ public partial class App : Application
             // Tray icon
             var trayViewModel = new TrayViewModel(
                 _storageService,
+                _promptSuggestionService,
                 v => { if (v) _httpListenerService.Start(); else _httpListenerService.Stop(); },
                 v => { if (v) _codexWatcherService.Start(); else _codexWatcherService.Stop(); });
             SetupTrayIcon(trayViewModel);
@@ -95,8 +99,43 @@ public partial class App : Application
                 }
                 LogService.Log($"[Pipeline] Showing notification score={payload.Score}");
                 _notificationService!.Show(payload);
+                var shownAt = DateTime.UtcNow;
                 await _storageService!.SavePromptAsync(payload).ConfigureAwait(false);
                 LogService.Log("[Pipeline] Saved to storage");
+
+                var interval = AppSettingsService.Load().SuggestionInterval;
+                var shouldSuggest = false;
+                if (interval > 0)
+                {
+                    var count = await _storageService!.GetStateAsync(AppStateKey.PromptsSinceLastSuggestion).ConfigureAwait(false) + 1;
+                    if (count >= interval)
+                    {
+                        await _storageService.SetStateAsync(AppStateKey.PromptsSinceLastSuggestion, 0).ConfigureAwait(false);
+                        shouldSuggest = true;
+                    }
+                    else
+                    {
+                        await _storageService.SetStateAsync(AppStateKey.PromptsSinceLastSuggestion, count).ConfigureAwait(false);
+                    }
+                }
+                if (shouldSuggest)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var suggestion = await _promptSuggestionService!.GenerateSuggestionAsync().ConfigureAwait(false);
+                            var elapsed = (DateTime.UtcNow - shownAt).TotalMilliseconds;
+                            var delay = Math.Max(0, (AutoCloseSeconds * 1000 + 500) - (int)elapsed);
+                            await Task.Delay(delay).ConfigureAwait(false);
+                            _notificationService.ShowSuggestion(suggestion.SuggestionText, suggestion.ExplanationText, AutoCloseSeconds);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogService.Log("[Pipeline] Suggestion notification failed", ex);
+                        }
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -115,6 +154,10 @@ public partial class App : Application
         dashboardItem.Click += (_, _) => trayViewModel.OpenDashboard();
         menu.Add(dashboardItem);
 
+
+        var suggestionsItem = new NativeMenuItem("Prompt Suggestions");
+        suggestionsItem.Click += (_, _) => trayViewModel.OpenPromptSuggestions();
+        menu.Add(suggestionsItem);
         var settingsItem = new NativeMenuItem("Settings");
         settingsItem.Click += (_, _) => trayViewModel.OpenSettings();
         menu.Add(settingsItem);
