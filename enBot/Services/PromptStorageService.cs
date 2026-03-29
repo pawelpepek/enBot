@@ -38,6 +38,22 @@ public class PromptStorageService
                 "Value" INTEGER NOT NULL DEFAULT 0
             )
             """).ConfigureAwait(false);
+
+        try
+        {
+            await ctx.Database.ExecuteSqlRawAsync("""
+                ALTER TABLE "PromptEntries" ADD COLUMN "ReceivedDay" TEXT NOT NULL DEFAULT ''
+                """).ConfigureAwait(false);
+        }
+        catch { /* column already exists on fresh DBs created by EnsureCreatedAsync */ }
+
+        await ctx.Database.ExecuteSqlRawAsync("""
+            UPDATE "PromptEntries" SET "ReceivedDay" = strftime('%Y-%m-%d', "ReceivedAt") WHERE "ReceivedDay" = ''
+            """).ConfigureAwait(false);
+
+        await ctx.Database.ExecuteSqlRawAsync("""
+            CREATE INDEX IF NOT EXISTS "IX_PromptEntries_ReceivedDay" ON "PromptEntries" ("ReceivedDay")
+            """).ConfigureAwait(false);
     }
 
     public async Task SavePromptAsync(HookPayload payload)
@@ -54,7 +70,8 @@ public class PromptStorageService
             ExplanationsJson = payload.Explanations is { Count: > 0 }
                 ? JsonSerializer.Serialize(payload.Explanations)
                 : null,
-            ReceivedAt = DateTime.Now
+            ReceivedAt = DateTime.Now,
+            ReceivedDay = DateTime.Now.ToString("yyyy-MM-dd")
         };
         ctx.PromptEntries.Add(entry);
         await ctx.SaveChangesAsync().ConfigureAwait(false);
@@ -110,7 +127,7 @@ public class PromptStorageService
     {
         await using var ctx = CreateContext();
         var dailyRaw = await ctx.PromptEntries
-            .GroupBy(e => e.ReceivedAt.Date)
+            .GroupBy(e => e.ReceivedDay)
             .Select(g => new
             {
                 Date = g.Key,
@@ -126,7 +143,7 @@ public class PromptStorageService
         var dailyStatistics = dailyRaw
             .Select(d => new DayPromptsStatistics
             {
-                Date = d.Date,
+                Date = DateTime.ParseExact(d.Date, "yyyy-MM-dd", null),
                 TotalPrompts = d.TotalPrompts,
                 AvgWeightedScore = d.TotalWordCount > 0 ? (double)d.WeightedScoreSum / d.TotalWordCount : 0,
                 AvgWeightedComplexity = d.TotalWordCount > 0 ? (double)d.WeightedComplexitySum / d.TotalWordCount : 0

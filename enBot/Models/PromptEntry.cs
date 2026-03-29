@@ -14,4 +14,5 @@ public class PromptEntry
     public string ExplanationsJson { get; set; }
     public string HookVersion { get; set; }
     public DateTime ReceivedAt { get; set; } = DateTime.UtcNow;
+    public string ReceivedDay { get; set; } = "";
 }

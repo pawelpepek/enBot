@@ -11,7 +11,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<PromptEntry>(e => e.HasKey(p => p.Id));
+        modelBuilder.Entity<PromptEntry>(e =>
+        {
+            e.HasKey(p => p.Id);
+            e.HasIndex(p => p.ReceivedDay);
+        });
         modelBuilder.Entity<PromptSuggestion>(e => e.HasKey(s => s.Id));
         modelBuilder.Entity<AppStateEntry>(e => e.HasKey(s => s.Key));
     }
