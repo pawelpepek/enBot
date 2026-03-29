@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace enBot.Views;
 
-public partial class PromptSuggestionsWindow : Window
+public partial class SettingsView : UserControl
 {
-    public PromptSuggestionsWindow()
+    public SettingsView()
     {
         InitializeComponent();
     }

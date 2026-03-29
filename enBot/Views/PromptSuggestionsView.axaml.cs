@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace enBot.Views;
 
-public partial class DashboardWindow : Window
+public partial class PromptSuggestionsView : UserControl
 {
-    public DashboardWindow()
+    public PromptSuggestionsView()
     {
         InitializeComponent();
     }

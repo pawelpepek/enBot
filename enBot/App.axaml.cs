@@ -150,17 +150,9 @@ public partial class App : Application
     {
         var menu = new NativeMenu();
 
-        var dashboardItem = new NativeMenuItem("Open Dashboard");
-        dashboardItem.Click += (_, _) => trayViewModel.OpenDashboard();
-        menu.Add(dashboardItem);
-
-
-        var suggestionsItem = new NativeMenuItem("Prompt Suggestions");
-        suggestionsItem.Click += (_, _) => trayViewModel.OpenPromptSuggestions();
-        menu.Add(suggestionsItem);
-        var settingsItem = new NativeMenuItem("Settings");
-        settingsItem.Click += (_, _) => trayViewModel.OpenSettings();
-        menu.Add(settingsItem);
+        var openItem = new NativeMenuItem("Open");
+        openItem.Click += (_, _) => trayViewModel.OpenMain();
+        menu.Add(openItem);
 
         menu.Add(new NativeMenuItemSeparator());
 

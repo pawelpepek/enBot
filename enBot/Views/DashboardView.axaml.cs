@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace enBot.Views;
 
-public partial class SettingsWindow : Window
+public partial class DashboardView : UserControl
 {
-    public SettingsWindow()
+    public DashboardView()
     {
         InitializeComponent();
     }

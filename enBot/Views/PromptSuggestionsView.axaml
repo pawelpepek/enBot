@@ -1,32 +1,14 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:enBot.ViewModels"
-        xmlns:models="using:enBot.Models"
-        x:Class="enBot.Views.PromptSuggestionsWindow"
-        x:DataType="vm:PromptSuggestionsViewModel"
-        Title="enBot — Prompt Suggestions"
-        Width="700" Height="500"
-        MinWidth="500" MinHeight="300">
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:enBot.ViewModels"
+             xmlns:models="using:enBot.Models"
+             x:Class="enBot.Views.PromptSuggestionsView"
+             x:DataType="vm:PromptSuggestionsViewModel">
 
-    <Grid RowDefinitions="Auto,*,Auto">
-
-        <!-- Header -->
-        <Border Grid.Row="0"
-                Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
-                Padding="20,12">
-            <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="Prompt Suggestions"
-                           FontSize="16" FontWeight="SemiBold"
-                           VerticalAlignment="Center"/>
-                <Button Grid.Column="1"
-                        Content="Refresh"
-                        Command="{Binding RefreshCommand}"
-                        IsEnabled="{Binding !IsLoading}"/>
-            </Grid>
-        </Border>
+    <Grid RowDefinitions="*,Auto">
 
         <!-- Content -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="0" Margin="0,0,0,12">
 
             <TextBlock Text="Loading…"
                        HorizontalAlignment="Center"
@@ -40,8 +22,8 @@
                        FontSize="13" Opacity="0.5"
                        IsVisible="{Binding IsEmpty}"/>
 
-            <ScrollViewer IsVisible="{Binding !IsLoading}" Padding="12">
-                <ItemsControl ItemsSource="{Binding Suggestions}">
+            <ScrollViewer IsVisible="{Binding !IsLoading}" Padding="12,12,12,0">
+                <ItemsControl ItemsSource="{Binding Suggestions}" Margin="0,0,0,12">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:PromptSuggestion">
                             <Border Margin="0,0,0,6" Padding="12,10"
@@ -74,21 +56,27 @@
         </Grid>
 
         <!-- Action bar -->
-        <Border Grid.Row="2"
-                Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
-                Padding="20,10">
-            <Grid ColumnDefinitions="*,Auto">
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="12,12,12,12">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding IsGenerating}">
+                <ProgressBar IsIndeterminate="True" Width="16" Height="16"/>
                 <TextBlock Text="Generating suggestion…"
                            FontSize="12" Opacity="0.7"
-                           VerticalAlignment="Center"
-                           IsVisible="{Binding IsGenerating}"/>
-                <Button Grid.Column="1"
-                        Content="Generate Suggestion"
-                        Command="{Binding GenerateSuggestionCommand}"
-                        IsEnabled="{Binding !IsGenerating}"
-                        FontWeight="SemiBold"/>
-            </Grid>
-        </Border>
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Content="Refresh"
+                    Command="{Binding RefreshCommand}"
+                    IsEnabled="{Binding !IsLoading}"
+                    Margin="0,0,8,0"/>
+            <Button Grid.Column="2"
+                    Content="Generate Suggestion"
+                    Command="{Binding GenerateSuggestionCommand}"
+                    IsEnabled="{Binding !IsGenerating}"
+                    FontWeight="SemiBold"/>
+        </Grid>
 
     </Grid>
-</Window>
+
+</UserControl>
