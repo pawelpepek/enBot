@@ -18,6 +18,10 @@
             <views:PromptSuggestionsView DataContext="{Binding Suggestions}"/>
         </TabItem>
 
+        <TabItem Header="Reports">
+            <views:ReportView DataContext="{Binding Report}"/>
+        </TabItem>
+
         <TabItem Header="Settings">
             <views:SettingsView DataContext="{Binding Settings}"/>
         </TabItem>

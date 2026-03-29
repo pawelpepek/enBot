@@ -38,6 +38,14 @@ public class PromptStorageService
                 "Value" INTEGER NOT NULL DEFAULT 0
             )
             """).ConfigureAwait(false);
+        await ctx.Database.ExecuteSqlRawAsync("""
+            CREATE TABLE IF NOT EXISTS "ProgressReports" (
+                "Id" INTEGER NOT NULL CONSTRAINT "PK_ProgressReports" PRIMARY KEY AUTOINCREMENT,
+                "CreatedAt" TEXT NOT NULL,
+                "ReportText" TEXT NOT NULL,
+                "SincePromptId" INTEGER NOT NULL DEFAULT 0
+            )
+            """).ConfigureAwait(false);
 
         try
         {
@@ -75,6 +83,30 @@ public class PromptStorageService
         };
         ctx.PromptEntries.Add(entry);
         await ctx.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async Task<int> GetPromptCountSinceAsync(int afterPromptId)
+    {
+        await using var ctx = CreateContext();
+        return await ctx.PromptEntries
+            .CountAsync(e => e.Id > afterPromptId)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<int> GetSuggestionCountAsync()
+    {
+        await using var ctx = CreateContext();
+        return await ctx.PromptSuggestions.CountAsync().ConfigureAwait(false);
+    }
+
+    public async Task<int> GetLastPromptIdAsync()
+    {
+        await using var ctx = CreateContext();
+        return await ctx.PromptEntries
+            .OrderByDescending(e => e.Id)
+            .Select(e => e.Id)
+            .FirstOrDefaultAsync()
+            .ConfigureAwait(false);
     }
 
     public async Task<List<PromptEntry>> GetLastPromptsAsync(int count)
@@ -121,6 +153,23 @@ public class PromptStorageService
         else
             entry.Value = value;
         await ctx.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async Task SaveReportAsync(ProgressReport report)
+    {
+        await using var ctx = CreateContext();
+        ctx.ProgressReports.Add(report);
+        await ctx.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async Task<List<ProgressReport>> GetRecentReportsAsync(int count)
+    {
+        await using var ctx = CreateContext();
+        return await ctx.ProgressReports
+            .OrderByDescending(r => r.Id)
+            .Take(count)
+            .ToListAsync()
+            .ConfigureAwait(false);
     }
 
     public async Task<PromptsStatistics> GetAllStatsAsync()

@@ -25,6 +25,7 @@ public partial class App : Application
     private PromptStorageService _storageService;
     private IAnalysisService _analysisService;
     private PromptSuggestionService _promptSuggestionService;
+    private ReportService _reportService;
     private TrayIcon _trayIcon;
 
     public override void Initialize()
@@ -57,6 +58,7 @@ public partial class App : Application
             var processor = AgentCliProcessorFactory.Create(settings.AnalysisProvider);
             _analysisService = new AnalysisService(processor);
             _promptSuggestionService = new PromptSuggestionService(_storageService, processor);
+            _reportService = new ReportService(_storageService, processor);
 
             _httpListenerService = new HttpListenerService("http://localhost:5151/");
             _httpListenerService.OnRawPromptReceived = HandleRawPrompt;
@@ -68,6 +70,7 @@ public partial class App : Application
             var trayViewModel = new TrayViewModel(
                 _storageService,
                 _promptSuggestionService,
+                _reportService,
                 v => { if (v) _httpListenerService.Start(); else _httpListenerService.Stop(); },
                 v => { if (v) _codexWatcherService.Start(); else _codexWatcherService.Stop(); });
             SetupTrayIcon(trayViewModel);

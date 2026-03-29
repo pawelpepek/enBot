@@ -1,0 +1,77 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:enBot.ViewModels"
+             xmlns:models="using:enBot.Models"
+             x:Class="enBot.Views.ReportView"
+             x:DataType="vm:ReportViewModel">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <!-- Content -->
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+
+            <TextBlock Text="Loading…"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontSize="14" Opacity="0.6"
+                       IsVisible="{Binding IsLoading}"/>
+
+            <TextBlock Text="No reports yet. Click Generate Report to get your first progress report."
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       FontSize="13" Opacity="0.5"
+                       IsVisible="{Binding IsEmpty}"/>
+
+            <ScrollViewer IsVisible="{Binding !IsLoading}" Padding="12,12,12,0">
+                <ItemsControl ItemsSource="{Binding Reports}" Margin="0,0,0,12">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:ProgressReport">
+                            <Border Margin="0,0,0,12" Padding="14,12"
+                                    BorderThickness="0,0,0,1"
+                                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+                                <StackPanel Spacing="6">
+                                    <TextBlock FontSize="11" Opacity="0.55">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0:dd MMM yyyy HH:mm}">
+                                                <Binding Path="CreatedAt"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                    <SelectableTextBlock Text="{Binding ReportText}"
+                                                         TextWrapping="Wrap"
+                                                         FontSize="13"
+                                                         LineHeight="20"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+        </Grid>
+
+        <!-- Action bar -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="12,12,12,12">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding IsGenerating}">
+                <ProgressBar IsIndeterminate="True" Width="16" Height="16"/>
+                <TextBlock Text="Generating report…"
+                           FontSize="12" Opacity="0.7"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Content="Refresh"
+                    Command="{Binding RefreshCommand}"
+                    IsEnabled="{Binding !IsLoading}"
+                    Margin="0,0,8,0"/>
+            <Button Grid.Column="2"
+                    Content="Generate Report"
+                    Command="{Binding GenerateReportCommand}"
+                    IsEnabled="{Binding !IsGenerating}"
+                    FontWeight="SemiBold"/>
+        </Grid>
+
+    </Grid>
+
+</UserControl>

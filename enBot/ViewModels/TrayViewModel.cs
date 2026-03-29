@@ -10,17 +10,20 @@ public class TrayViewModel
 {
     private readonly PromptStorageService _storageService;
     private readonly PromptSuggestionService _suggestionService;
+    private readonly ReportService _reportService;
     private readonly Action<bool> _onClaudeMonitoringChanged;
     private readonly Action<bool> _onCodexMonitoringChanged;
 
     public TrayViewModel(
         PromptStorageService storageService,
         PromptSuggestionService suggestionService,
+        ReportService reportService,
         Action<bool> onClaudeMonitoringChanged,
         Action<bool> onCodexMonitoringChanged)
     {
         _storageService = storageService;
         _suggestionService = suggestionService;
+        _reportService = reportService;
         _onClaudeMonitoringChanged = onClaudeMonitoringChanged;
         _onCodexMonitoringChanged = onCodexMonitoringChanged;
     }
@@ -39,7 +42,7 @@ public class TrayViewModel
             return;
         }
 
-        var vm = new MainViewModel(_storageService, _suggestionService, _onClaudeMonitoringChanged, _onCodexMonitoringChanged);
+        var vm = new MainViewModel(_storageService, _suggestionService, _reportService, _onClaudeMonitoringChanged, _onCodexMonitoringChanged);
         _mainWindow = new MainWindow { DataContext = vm };
         _mainWindow.Closed += (_, _) => _mainWindow = null;
         _mainWindow.Show();
