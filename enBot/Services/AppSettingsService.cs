@@ -75,7 +75,7 @@ public class AppSettingsService
                 CreateNoWindow = true
             });
             p?.WaitForExit(2000);
-            return true;
+            return p?.ExitCode == 0;
         }
         catch { return false; }
     }
