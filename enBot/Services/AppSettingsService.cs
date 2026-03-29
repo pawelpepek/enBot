@@ -18,6 +18,12 @@ public class AppSettingsService
     [JsonPropertyName("monitorCodex")]
     public bool MonitorCodex { get; set; } = false;
 
+    [JsonPropertyName("userProfile")]
+    public string UserProfile { get; set; } = "";
+
+    [JsonPropertyName("suggestionInterval")]
+    public int SuggestionInterval { get; set; } = 10;
+
     private static string SettingsFilePath
     {
         get
@@ -69,7 +75,7 @@ public class AppSettingsService
                 CreateNoWindow = true
             });
             p?.WaitForExit(2000);
-            return true;
+            return p?.ExitCode == 0;
         }
         catch { return false; }
     }

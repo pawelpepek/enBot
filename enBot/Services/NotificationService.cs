@@ -16,6 +16,28 @@ public class NotificationService
     }
 
     private NotificationWindow _current;
+    private SuggestionNotificationWindow _currentSuggestion;
+
+    public void ShowSuggestion(string suggestionText, string explanationText, int autoCloseSeconds)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            try
+            {
+                _currentSuggestion?.Close();
+                _currentSuggestion = new SuggestionNotificationWindow();
+                _currentSuggestion.SetContent(suggestionText, explanationText);
+                _currentSuggestion.Closed += (_, _) => _currentSuggestion = null;
+                _currentSuggestion.Show();
+                _currentSuggestion.StartAutoClose(autoCloseSeconds);
+                LogService.Log("[Notification] Suggestion window shown");
+            }
+            catch (Exception ex)
+            {
+                LogService.Log("[Notification] Failed to show suggestion window", ex);
+            }
+        });
+    }
 
     public void Show(HookPayload payload)
     {

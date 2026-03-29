@@ -18,6 +18,8 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty] private bool _isCodexSelected;
     [ObservableProperty] private bool _isClaudeMonitored;
     [ObservableProperty] private bool _isCodexMonitored;
+    [ObservableProperty] private string _userProfile = "";
+    [ObservableProperty] private decimal _suggestionInterval;
 
     private readonly AppSettingsService _appSettings;
     private readonly Action<bool> _onClaudeMonitoringChanged;
@@ -42,6 +44,8 @@ public partial class SettingsViewModel : ViewModelBase
 
         _isClaudeMonitored = _appSettings.MonitorClaude;
         _isCodexMonitored = _appSettings.MonitorCodex;
+        _userProfile = _appSettings.UserProfile;
+        _suggestionInterval = _appSettings.SuggestionInterval;
     }
 
     partial void OnIsClaudeSelectedChanged(bool value)
@@ -72,6 +76,18 @@ public partial class SettingsViewModel : ViewModelBase
         _appSettings.MonitorCodex = value;
         _appSettings.Save();
         _onCodexMonitoringChanged(value);
+    }
+
+    partial void OnUserProfileChanged(string value)
+    {
+        _appSettings.UserProfile = value;
+        _appSettings.Save();
+    }
+
+    partial void OnSuggestionIntervalChanged(decimal value)
+    {
+        _appSettings.SuggestionInterval = (int)value;
+        _appSettings.Save();
     }
 
     private static readonly string HookScript = """

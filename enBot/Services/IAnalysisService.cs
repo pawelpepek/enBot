@@ -5,5 +5,5 @@ namespace enBot.Services;
 
 public interface IAnalysisService
 {
-    Task<HookPayload?> AnalyzeAsync(string original);
+    Task<HookPayload> AnalyzeAsync(string original);
 }
