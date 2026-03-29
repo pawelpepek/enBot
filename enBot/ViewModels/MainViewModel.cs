@@ -20,6 +20,6 @@ public class MainViewModel : ViewModelBase
         Dashboard = new DashboardViewModel(storageService);
         Suggestions = new PromptSuggestionsViewModel(suggestionService);
         Report = new ReportViewModel(reportService);
-        Settings = new SettingsViewModel(onClaudeMonitoringChanged, onCodexMonitoringChanged);
+        Settings = new SettingsViewModel(storageService, onClaudeMonitoringChanged, onCodexMonitoringChanged);
     }
 }

@@ -22,11 +22,16 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty] private decimal _suggestionInterval;
 
     private readonly AppSettingsService _appSettings;
+    private readonly PromptStorageService _storageService;
     private readonly Action<bool> _onClaudeMonitoringChanged;
     private readonly Action<bool> _onCodexMonitoringChanged;
 
-    public SettingsViewModel(Action<bool> onClaudeMonitoringChanged, Action<bool> onCodexMonitoringChanged)
+    public SettingsViewModel(
+        PromptStorageService storageService,
+        Action<bool> onClaudeMonitoringChanged,
+        Action<bool> onCodexMonitoringChanged)
     {
+        _storageService = storageService;
         _onClaudeMonitoringChanged = onClaudeMonitoringChanged;
         _onCodexMonitoringChanged = onCodexMonitoringChanged;
 
@@ -44,8 +49,14 @@ public partial class SettingsViewModel : ViewModelBase
 
         _isClaudeMonitored = _appSettings.MonitorClaude;
         _isCodexMonitored = _appSettings.MonitorCodex;
-        _userProfile = _appSettings.UserProfile;
         _suggestionInterval = _appSettings.SuggestionInterval;
+
+        _ = LoadUserProfileAsync();
+    }
+
+    private async Task LoadUserProfileAsync()
+    {
+        UserProfile = await _storageService.GetConfigAsync(AppConfigKey.UserProfile).ConfigureAwait(false);
     }
 
     partial void OnIsClaudeSelectedChanged(bool value)
@@ -80,8 +91,7 @@ public partial class SettingsViewModel : ViewModelBase
 
     partial void OnUserProfileChanged(string value)
     {
-        _appSettings.UserProfile = value;
-        _appSettings.Save();
+        _ = _storageService.SetConfigAsync(AppConfigKey.UserProfile, value);
     }
 
     partial void OnSuggestionIntervalChanged(decimal value)

@@ -26,7 +26,7 @@ public class ReportService
         var prompts = await _storage.GetLastPromptsAsync(100).ConfigureAwait(false);
         var lastPromptId = await _storage.GetLastPromptIdAsync().ConfigureAwait(false);
         var suggestionCount = await _storage.GetSuggestionCountAsync().ConfigureAwait(false);
-        var userProfile = AppSettingsService.Load().UserProfile;
+        var userProfile = await _storage.GetConfigAsync(AppConfigKey.UserProfile).ConfigureAwait(false);
 
         var lastReport = (await _storage.GetRecentReportsAsync(1).ConfigureAwait(false)).FirstOrDefault();
         var promptsSinceLastReport = lastReport is not null

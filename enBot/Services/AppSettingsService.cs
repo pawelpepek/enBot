@@ -18,9 +18,6 @@ public class AppSettingsService
     [JsonPropertyName("monitorCodex")]
     public bool MonitorCodex { get; set; } = false;
 
-    [JsonPropertyName("userProfile")]
-    public string UserProfile { get; set; } = "";
-
     [JsonPropertyName("suggestionInterval")]
     public int SuggestionInterval { get; set; } = 10;
 

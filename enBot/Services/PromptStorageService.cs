@@ -46,6 +46,12 @@ public class PromptStorageService
                 "SincePromptId" INTEGER NOT NULL DEFAULT 0
             )
             """).ConfigureAwait(false);
+        await ctx.Database.ExecuteSqlRawAsync("""
+            CREATE TABLE IF NOT EXISTS "AppConfig" (
+                "Key" INTEGER NOT NULL CONSTRAINT "PK_AppConfig" PRIMARY KEY,
+                "Value" TEXT NOT NULL DEFAULT ''
+            )
+            """).ConfigureAwait(false);
 
         try
         {
@@ -150,6 +156,24 @@ public class PromptStorageService
         var entry = await ctx.AppState.FindAsync(key).ConfigureAwait(false);
         if (entry is null)
             ctx.AppState.Add(new AppStateEntry { Key = key, Value = value });
+        else
+            entry.Value = value;
+        await ctx.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async Task<string> GetConfigAsync(AppConfigKey key)
+    {
+        await using var ctx = CreateContext();
+        var entry = await ctx.AppConfig.FindAsync(key).ConfigureAwait(false);
+        return entry?.Value ?? "";
+    }
+
+    public async Task SetConfigAsync(AppConfigKey key, string value)
+    {
+        await using var ctx = CreateContext();
+        var entry = await ctx.AppConfig.FindAsync(key).ConfigureAwait(false);
+        if (entry is null)
+            ctx.AppConfig.Add(new AppConfigEntry { Key = key, Value = value });
         else
             entry.Value = value;
         await ctx.SaveChangesAsync().ConfigureAwait(false);

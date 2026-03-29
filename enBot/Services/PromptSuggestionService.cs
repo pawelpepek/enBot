@@ -25,7 +25,7 @@ public class PromptSuggestionService
     {
         var prompts = await _storage.GetLastPromptsAsync(50).ConfigureAwait(false);
         var recent = await _storage.GetRecentSuggestionsAsync(5).ConfigureAwait(false);
-        var userProfile = AppSettingsService.Load().UserProfile;
+        var userProfile = await _storage.GetConfigAsync(AppConfigKey.UserProfile).ConfigureAwait(false);
 
         var prompt = BuildPrompt(prompts, recent, userProfile);
 
