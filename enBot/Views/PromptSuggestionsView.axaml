@@ -44,6 +44,7 @@
                                     <SelectableTextBlock Text="{Binding ExplanationText}"
                                                          TextWrapping="Wrap"
                                                          FontSize="12"
+														 Padding="0,0,20,0"
                                                          Opacity="0.65"
                                                          IsVisible="{Binding ExplanationText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
                                 </StackPanel>

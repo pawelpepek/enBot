@@ -104,11 +104,11 @@ public partial class DashboardViewModel : ViewModelBase
             ?
               [
                   new Axis { Name = "Prompts", MinLimit = 0 },
-                  new Axis { Name = "Score / Complexity", MinLimit = 0, MaxLimit = 10 }
+                  new Axis { Name = "Score / Complexity", MinLimit = 0, MaxLimit = 11 }
               ]
             :
               [
-                  new Axis { Name = "Score / Complexity", MinLimit = 0, MaxLimit = 10 }
+                  new Axis { Name = "Score / Complexity", MinLimit = 0, MaxLimit = 11 }
               ];
     }
 }

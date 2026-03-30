@@ -25,7 +25,7 @@
     <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
             CornerRadius="10"
             BoxShadow="0 4 20 0 #40000000">
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" Margin="16">
+        <Grid RowDefinitions="Auto,Auto,Auto" Margin="16">
 
             <!-- Header row: title + language + score + complexity badges -->
             <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto">
@@ -72,83 +72,94 @@
                 </Border>
             </Grid>
 
-            <!-- Corrected with bold highlights -->
-            <StackPanel Grid.Row="1" Margin="0,12,0,0">
-                <TextBlock Text="Corrected"
-                           FontSize="12"
-                           Opacity="0.55"
-                           Margin="0,0,0,3"/>
-                <ItemsControl ItemsSource="{Binding CorrectedInlines}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:InlineSegment">
-                            <TextBlock Text="{Binding Text}"
-                                       FontSize="15"
-                                       FontWeight="{Binding IsBold, Converter={StaticResource BoldIfTrue}}"
-                                       FontStyle="{Binding IsItalic, Converter={StaticResource ItalicIfTrue}}"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
+            <!-- Scrollable body: Corrected, Original, Explanations -->
+            <ScrollViewer Grid.Row="1"
+                          MaxHeight="420"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Margin="0,12,0,0">
+                <StackPanel>
 
-            <!-- Original -->
-            <StackPanel Grid.Row="2" Margin="0,10,0,0">
-                <TextBlock Text="Original"
-                           FontSize="12"
-                           Opacity="0.55"
-                           Margin="0,0,0,3"/>
-                <ItemsControl ItemsSource="{Binding OriginalInlines}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:InlineSegment">
-                            <TextBlock Text="{Binding Text}"
-                                       FontSize="15"
-                                       FontWeight="{Binding IsBold, Converter={StaticResource BoldIfTrue}}"
-                                       FontStyle="{Binding IsItalic, Converter={StaticResource ItalicIfTrue}}"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
+                    <!-- Corrected with bold highlights -->
+                    <StackPanel>
+                        <TextBlock Text="Corrected"
+                                   FontSize="12"
+                                   Opacity="0.55"
+                                   Margin="0,0,0,3"/>
+                        <ItemsControl ItemsSource="{Binding CorrectedInlines}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:InlineSegment">
+                                    <TextBlock Text="{Binding Text}"
+                                               FontSize="15"
+                                               FontWeight="{Binding IsBold, Converter={StaticResource BoldIfTrue}}"
+                                               FontStyle="{Binding IsItalic, Converter={StaticResource ItalicIfTrue}}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
 
-            <!-- Explanations -->
-            <StackPanel Grid.Row="3" IsVisible="{Binding HasExplanations}" Margin="0,10,0,0">
-                <TextBlock Text="Explanations"
-                           FontSize="12"
-                           Opacity="0.55"
-                           Margin="0,0,0,3"/>
-                <ItemsControl ItemsSource="{Binding Explanations}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <ItemsControl ItemsSource="{Binding}" Margin="0,0,0,4">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel Orientation="Horizontal"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="models:InlineSegment">
-                                        <TextBlock Text="{Binding Text}"
-                                                   FontSize="14"
-                                                   FontWeight="{Binding IsBold, Converter={StaticResource BoldIfTrue}}"
-                                                   FontStyle="{Binding IsItalic, Converter={StaticResource ItalicIfTrue}}"/>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
+                    <!-- Original -->
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock Text="Original"
+                                   FontSize="12"
+                                   Opacity="0.55"
+                                   Margin="0,0,0,3"/>
+                        <ItemsControl ItemsSource="{Binding OriginalInlines}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:InlineSegment">
+                                    <TextBlock Text="{Binding Text}"
+                                               FontSize="15"
+                                               FontWeight="{Binding IsBold, Converter={StaticResource BoldIfTrue}}"
+                                               FontStyle="{Binding IsItalic, Converter={StaticResource ItalicIfTrue}}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Explanations -->
+                    <StackPanel IsVisible="{Binding HasExplanations}" Margin="0,10,0,0">
+                        <TextBlock Text="Explanations"
+                                   FontSize="12"
+                                   Opacity="0.55"
+                                   Margin="0,0,0,3"/>
+                        <ItemsControl ItemsSource="{Binding Explanations}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ItemsControl ItemsSource="{Binding}" Margin="0,0,0,4">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="models:InlineSegment">
+                                                <TextBlock Text="{Binding Text}"
+                                                           FontSize="14"
+                                                           FontWeight="{Binding IsBold, Converter={StaticResource BoldIfTrue}}"
+                                                           FontStyle="{Binding IsItalic, Converter={StaticResource ItalicIfTrue}}"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                </StackPanel>
+            </ScrollViewer>
 
             <!-- Footer: close -->
-            <Grid Grid.Row="4" Margin="0,12,0,0" ColumnDefinitions="*,Auto">
+            <Grid Grid.Row="2" Margin="0,12,0,0" ColumnDefinitions="*,Auto">
                 <Button Grid.Column="1"
                         Content="Close"
                         Padding="12,4"
