@@ -178,6 +178,11 @@ public class CodexWatcherService : IDisposable
         catch { return null; }
     }
 
+    private static readonly string[] CodexSystemPrefixes =
+    [
+        "PLEASE IMPLEMENT THIS PLAN:",
+    ];
+
     private static string TryParseUserMessage(string line)
     {
         if (string.IsNullOrWhiteSpace(line)) return null;
@@ -186,10 +191,14 @@ public class CodexWatcherService : IDisposable
             var ev = JsonSerializer.Deserialize<CodexEvent>(line);
             if (ev?.Type == "event_msg" &&
                 ev.Payload?.Type == "user_message" &&
-                !string.IsNullOrWhiteSpace(ev.Payload.Message))
+                !string.IsNullOrWhiteSpace(ev.Payload.Message) &&
+                !IsCodexSystemMessage(ev.Payload.Message))
                 return ev.Payload.Message;
         }
         catch { }
         return null;
     }
+
+    private static bool IsCodexSystemMessage(string message) =>
+        Array.Exists(CodexSystemPrefixes, p => message.StartsWith(p, StringComparison.OrdinalIgnoreCase));
 }

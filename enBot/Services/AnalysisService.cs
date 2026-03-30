@@ -17,6 +17,14 @@ public class AnalysisService : IAnalysisService
     public async Task<HookPayload> AnalyzeAsync(string original)
     {
         original = original.Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ').Trim();
+
+        const int MaxChars = 600;
+        if (original.Length > MaxChars)
+        {
+            LogService.Log($"[Analysis] Truncating prompt from {original.Length} to {MaxChars} chars");
+            original = original[..MaxChars];
+        }
+
         var wordCount = original.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
 
         if (wordCount < 2)
