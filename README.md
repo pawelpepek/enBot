@@ -2,6 +2,12 @@
 
 enBot is a Windows system tray application that watches your AI coding agent sessions, analyses every prompt you type for English grammar and spelling, and shows a toast notification with the corrected version, a grammar score, and explanations. Results are persisted to a local SQLite database and visualised in a built-in dashboard.
 
+## Download
+
+[**Download latest release — Windows x64**](https://github.com/pawelpepek/enBot/releases/latest/download/app-win64.zip)
+
+Requires [.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) on the target machine.
+
 ## What it does
 
 - **Intercepts prompts** from Claude Code (via HTTP hook) or Codex (via session file watcher)

@@ -1,0 +1,57 @@
+name: Build and Release
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore enBot/enBot.csproj -r win-x64
+
+      - name: Build
+        run: dotnet build enBot/enBot.csproj -c Release -r win-x64 --no-restore
+
+      - name: Publish
+        run: dotnet publish enBot/enBot.csproj -c Release -r win-x64 --self-contained false --no-build -o publish/
+
+      - name: Archive
+        run: zip -r app-win64.zip publish/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-win64
+          path: app-win64.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-win64
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: enBot ${{ github.ref_name }}
+          files: app-win64.zip
