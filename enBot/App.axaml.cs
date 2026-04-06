@@ -30,6 +30,8 @@ public partial class App : Application
     private PromptSuggestionService _promptSuggestionService;
     private ReportService _reportService;
     private TrayIcon _trayIcon;
+    private NativeMenuItem _toggleItem;
+    private bool _isMonitoring = true;
 
     public override void Initialize()
     {
@@ -156,6 +158,12 @@ public partial class App : Application
     {
         var menu = new NativeMenu();
 
+        _toggleItem = new NativeMenuItem("Power Off");
+        _toggleItem.Click += (_, _) => ToggleMonitoring();
+        menu.Add(_toggleItem);
+
+        menu.Add(new NativeMenuItemSeparator());
+
         var openItem = new NativeMenuItem("Open");
         openItem.Click += (_, _) => trayViewModel.OpenMain();
         menu.Add(openItem);
@@ -169,12 +177,37 @@ public partial class App : Application
         _trayIcon = new TrayIcon
         {
             ToolTipText = "enBot",
-            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://enBot/Assets/avalonia-logo.png"))),
+            Icon = CreateStatusIcon(true),
             Menu = menu,
             IsVisible = true
         };
 
         TrayIcon.SetIcons(this, new TrayIcons { _trayIcon });
+    }
+
+    private void ToggleMonitoring()
+    {
+        _isMonitoring = !_isMonitoring;
+        _toggleItem.Header = _isMonitoring ? "Power Off" : "Power On";
+        _trayIcon.Icon = CreateStatusIcon(_isMonitoring);
+
+        if (_isMonitoring)
+        {
+            var settings = AppSettingsService.Load();
+            if (settings.MonitorClaude) _httpListenerService.Start();
+            if (settings.MonitorCodex) _codexWatcherService.Start();
+        }
+        else
+        {
+            _httpListenerService.Stop();
+            _codexWatcherService.Stop();
+        }
+    }
+
+    private static WindowIcon CreateStatusIcon(bool isEnabled)
+    {
+        var asset = isEnabled ? "logo-on.png" : "logo-off.png";
+        return new WindowIcon(AssetLoader.Open(new Uri($"avares://enBot/Assets/{asset}")));
     }
 
     private static string GetDatabasePath()
