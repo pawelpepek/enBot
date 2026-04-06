@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using enBot.Services;
+using enBot.Services.Analysis;
+using enBot.Services.Infrastructure;
 using enBot.Views;
 using System;
 

@@ -1,6 +1,6 @@
 using enBot.Models;
 
-namespace enBot.Services;
+namespace enBot.Services.AgentCli;
 
 public static class AgentCliProcessorFactory
 {

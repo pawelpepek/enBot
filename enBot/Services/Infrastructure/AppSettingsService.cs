@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using enBot.Models;
 
-namespace enBot.Services;
+namespace enBot.Services.Infrastructure;
 
 public class AppSettingsService
 {

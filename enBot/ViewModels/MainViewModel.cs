@@ -1,4 +1,5 @@
-using enBot.Services;
+using enBot.Services.Analysis;
+using enBot.Services.Infrastructure;
 using System;
 
 namespace enBot.ViewModels;

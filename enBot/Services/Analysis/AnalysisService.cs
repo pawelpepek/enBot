@@ -1,17 +1,22 @@
 using enBot.Models;
+using enBot.Services.AgentCli;
+using enBot.Services.Infrastructure;
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace enBot.Services;
+namespace enBot.Services.Analysis;
 
 public class AnalysisService : IAnalysisService
 {
-    private readonly AgentCliRunner _runner;
+    private readonly IAgentCliRunner _runner;
 
     public AnalysisService(IAgentCliProcessor processor)
+        : this(new AgentCliRunner(processor)) { }
+
+    public AnalysisService(IAgentCliRunner runner)
     {
-        _runner = new AgentCliRunner(processor);
+        _runner = runner;
     }
 
     public async Task<HookPayload> AnalyzeAsync(string original)

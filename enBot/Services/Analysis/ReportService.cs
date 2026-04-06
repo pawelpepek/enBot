@@ -1,10 +1,12 @@
 using enBot.Models;
+using enBot.Services.AgentCli;
+using enBot.Services.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace enBot.Services;
+namespace enBot.Services.Analysis;
 
 public class ReportService
 {

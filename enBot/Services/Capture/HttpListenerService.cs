@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace enBot.Services;
+namespace enBot.Services.Capture;
 
 public class HttpListenerService : IDisposable
 {

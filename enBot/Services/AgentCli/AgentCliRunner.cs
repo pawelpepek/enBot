@@ -1,11 +1,12 @@
+using enBot.Services.Infrastructure;
 using System;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace enBot.Services;
+namespace enBot.Services.AgentCli;
 
-public class AgentCliRunner(IAgentCliProcessor processor)
+public class AgentCliRunner(IAgentCliProcessor processor) : IAgentCliRunner
 {
     public async Task<string> RunAsync(string prompt)
     {

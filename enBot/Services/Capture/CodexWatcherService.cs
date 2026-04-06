@@ -1,4 +1,5 @@
 using enBot.Models;
+using enBot.Services.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 
-namespace enBot.Services;
+namespace enBot.Services.Capture;
 
 public class CodexWatcherService : IDisposable
 {

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace enBot.Services;
+namespace enBot.Services.Infrastructure;
 
 public class AppRepository
 {

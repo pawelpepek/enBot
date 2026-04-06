@@ -5,7 +5,6 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using enBot.Models;
-using enBot.Services;
 using enBot.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using enBot.Data;
@@ -13,6 +12,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using enBot.Services.AgentCli;
+using enBot.Services.Analysis;
+using enBot.Services.Capture;
+using enBot.Services.Infrastructure;
 
 namespace enBot;
 
