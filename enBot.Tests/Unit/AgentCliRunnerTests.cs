@@ -40,18 +40,12 @@ public class AgentCliRunnerTests
             return CreateSimplePsi("cmd", $"/c echo {text}");
         }
 
-        return CreateSimplePsi("bash", $"-lc \"echo {text}\"");
+        return CreateSimplePsi("bash", $"-c \"echo {text}\"");
     }
 
-    private static ProcessStartInfo StdinEchoPsi()
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            return CreateUtf8StdinPsi("powershell", "-NoProfile -NonInteractive -Command \"[Console]::In.ReadToEnd()\"");
-        }
-
-        return CreateUtf8StdinPsi("bash", "-lc \"cat\"");
-    }
+    private static ProcessStartInfo StdinEchoPsi() => OperatingSystem.IsWindows()
+        ? CreateUtf8StdinPsi("powershell", "-NoProfile -NonInteractive -Command \"[Console]::In.ReadToEnd()\"")
+        : CreateUtf8StdinPsi("bash", "-c \"cat\"");
 
     [Fact]
     public async Task RunAsync_ReturnsStdout()
@@ -64,7 +58,10 @@ public class AgentCliRunnerTests
     [Fact]
     public async Task RunAsync_SetsEnbotAnalysisEnvVar()
     {
-        var runner = new AgentCliRunner(new FakeCliProcessor(EchoPsi("%ENBOT_ANALYSIS%")));
+        var psi = OperatingSystem.IsWindows()
+            ? CreateSimplePsi("cmd", "/c echo %ENBOT_ANALYSIS%")
+            : CreateSimplePsi("printenv", "ENBOT_ANALYSIS");
+        var runner = new AgentCliRunner(new FakeCliProcessor(psi));
         var result = await runner.RunAsync("any");
         Assert.Contains("1", result);
     }
