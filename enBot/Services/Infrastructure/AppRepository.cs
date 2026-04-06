@@ -61,6 +61,14 @@ public class AppRepository
         }
         catch { /* column already exists on fresh DBs created by EnsureCreatedAsync */ }
 
+        try
+        {
+            await ctx.Database.ExecuteSqlRawAsync("""
+                ALTER TABLE "PromptEntries" ADD COLUMN "BetterVersion" TEXT
+                """).ConfigureAwait(false);
+        }
+        catch { /* column already exists */ }
+
         await ctx.Database.ExecuteSqlRawAsync("""
             UPDATE "PromptEntries" SET "ReceivedDay" = strftime('%Y-%m-%d', "ReceivedAt") WHERE "ReceivedDay" = ''
             """).ConfigureAwait(false);
@@ -84,6 +92,7 @@ public class AppRepository
             ExplanationsJson = payload.Explanations is { Count: > 0 }
                 ? JsonSerializer.Serialize(payload.Explanations)
                 : null,
+            BetterVersion = payload.BetterVersion,
             ReceivedAt = DateTime.Now,
             ReceivedDay = DateTime.Now.ToString("yyyy-MM-dd")
         };

@@ -12,6 +12,7 @@ public class PromptEntry
     public int Complexity { get; set; }
     public int WordCount { get; set; }
     public string ExplanationsJson { get; set; }
+    public string BetterVersion { get; set; }
     public string HookVersion { get; set; }
     public DateTime ReceivedAt { get; set; } = DateTime.UtcNow;
     public string ReceivedDay { get; set; } = "";

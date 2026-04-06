@@ -95,4 +95,24 @@ public class AnalysisServiceTests
         Assert.NotNull(result);
         Assert.Equal(3, result.WordCount);
     }
+
+    [Fact]
+    public async Task AnalyzeAsync_BetterVersionPresent_IsMappedToPayload()
+    {
+        var json = "{\"language\":\"en\",\"corrected\":\"\",\"score\":9,\"complexity\":6,\"displayOriginal\":\"Can you do the thing\",\"explanations\":[],\"betterVersion\":\"Could you handle that?\"}";
+        var svc = new AnalysisService(new TestCliProcessor(json));
+        var result = await svc.AnalyzeAsync("Can you do the thing");
+        Assert.NotNull(result);
+        Assert.Equal("Could you handle that?", result.BetterVersion);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_BetterVersionAbsent_IsNull()
+    {
+        var json = "{\"language\":\"en\",\"corrected\":\"\",\"score\":10,\"complexity\":7,\"displayOriginal\":\"Please fix the bug\",\"explanations\":[]}";
+        var svc = new AnalysisService(new TestCliProcessor(json));
+        var result = await svc.AnalyzeAsync("Please fix the bug");
+        Assert.NotNull(result);
+        Assert.Null(result.BetterVersion);
+    }
 }

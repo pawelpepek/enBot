@@ -156,4 +156,34 @@ public class AppRepositoryTests : IAsyncLifetime
         var value = await _repo.GetConfigAsync(AppConfigKey.UserProfile);
         Assert.Equal("", value);
     }
+
+    [Fact]
+    public async Task SavePromptAsync_WithBetterVersion_IsPersisted()
+    {
+        var payload = new HookPayload
+        {
+            Original = "Can you do the thing",
+            Corrected = "",
+            DisplayOriginal = "Can you do the thing",
+            Score = 9,
+            Complexity = 6,
+            WordCount = 5,
+            Explanations = [],
+            BetterVersion = "Could you handle that?",
+            HookVersion = "2.0"
+        };
+        await _repo.SavePromptAsync(payload);
+        var prompts = await _repo.GetLastPromptsAsync(1);
+        Assert.Single(prompts);
+        Assert.Equal("Could you handle that?", prompts[0].BetterVersion);
+    }
+
+    [Fact]
+    public async Task SavePromptAsync_WithoutBetterVersion_IsNull()
+    {
+        await _repo.SavePromptAsync(MakePayload(score: 8, complexity: 6, wordCount: 4));
+        var prompts = await _repo.GetLastPromptsAsync(1);
+        Assert.Single(prompts);
+        Assert.Null(prompts[0].BetterVersion);
+    }
 }

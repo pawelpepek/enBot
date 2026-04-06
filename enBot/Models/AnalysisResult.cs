@@ -22,4 +22,7 @@ public record AnalysisResult
 
     [JsonPropertyName("explanations")]
     public List<string> Explanations { get; init; }
+
+    [JsonPropertyName("betterVersion")]
+    public string BetterVersion { get; init; }
 }
