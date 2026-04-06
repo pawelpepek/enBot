@@ -155,6 +155,17 @@
                         </ItemsControl>
                     </StackPanel>
 
+                    <!-- Better version -->
+                    <StackPanel IsVisible="{Binding HasBetterVersion}" Margin="0,10,0,0">
+                        <TextBlock Text="How can we do this better?"
+                                   FontSize="12"
+                                   Opacity="0.55"
+                                   Margin="0,0,0,3"/>
+                        <TextBlock Text="{Binding BetterVersion}"
+                                   FontSize="15"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+
                 </StackPanel>
             </ScrollViewer>
 

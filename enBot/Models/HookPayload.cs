@@ -28,4 +28,7 @@ public record HookPayload
 
     [JsonPropertyName("hookVersion")]
     public string HookVersion { get; init; }
+
+    [JsonPropertyName("betterVersion")]
+    public string BetterVersion { get; init; }
 }
