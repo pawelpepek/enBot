@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace enBot.Services;
+namespace enBot.Services.Infrastructure;
 
 public static class LogService
 {

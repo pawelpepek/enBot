@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace enBot.Services;
+namespace enBot.Services.AgentCli;
 
 public interface IAgentCliProcessor
 {

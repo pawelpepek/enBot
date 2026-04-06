@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
-using enBot.Services;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -11,6 +10,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using enBot.Models;
 using System.Linq;
+using enBot.Services.Infrastructure;
 
 namespace enBot.ViewModels;
 

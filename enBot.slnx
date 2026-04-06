@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="enBot.Tests/enBot.Tests.csproj" Id="9c7323ec-8b87-44ba-afca-1317208e2772" />
   <Project Path="enBot/enBot.csproj" />
 </Solution>

@@ -4,7 +4,7 @@ using enBot.Models;
 using enBot.ViewModels;
 using enBot.Views;
 
-namespace enBot.Services;
+namespace enBot.Services.Infrastructure;
 
 public class NotificationService
 {

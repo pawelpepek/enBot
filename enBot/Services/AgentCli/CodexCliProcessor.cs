@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace enBot.Services;
+namespace enBot.Services.AgentCli;
 
 public class CodexCliProcessor : IAgentCliProcessor
 {
