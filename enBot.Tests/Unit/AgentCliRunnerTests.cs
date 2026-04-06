@@ -11,47 +11,18 @@ public class AgentCliRunnerTests
         public ProcessStartInfo GetProcessStartInfo(string prompt) => psi;
     }
 
-    private static ProcessStartInfo EchoPsi(string text)
-    {
-        if (OperatingSystem.IsWindows())
+    private static ProcessStartInfo CreateSimplePsi(string fileName, string arguments, bool redirectStandardInput = false) =>
+        new(fileName, arguments)
         {
-            return new ProcessStartInfo("cmd", $"/c echo {text}")
-            {
-                RedirectStandardInput = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-        }
-
-        return new ProcessStartInfo("bash", $"-lc \"echo {text}\"")
-        {
-            RedirectStandardInput = false,
+            RedirectStandardInput = redirectStandardInput,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true
         };
-    }
 
-    private static ProcessStartInfo StdinEchoPsi()
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            return new ProcessStartInfo("powershell", "-NoProfile -NonInteractive -Command \"[Console]::In.ReadToEnd()\"")
-            {
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                StandardOutputEncoding = System.Text.Encoding.UTF8,
-                StandardErrorEncoding = System.Text.Encoding.UTF8
-            };
-        }
-
-        return new ProcessStartInfo("bash", "-lc \"cat\"")
+    private static ProcessStartInfo CreateUtf8StdinPsi(string fileName, string arguments) =>
+        new(fileName, arguments)
         {
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
@@ -61,6 +32,25 @@ public class AgentCliRunnerTests
             StandardOutputEncoding = System.Text.Encoding.UTF8,
             StandardErrorEncoding = System.Text.Encoding.UTF8
         };
+
+    private static ProcessStartInfo EchoPsi(string text)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return CreateSimplePsi("cmd", $"/c echo {text}");
+        }
+
+        return CreateSimplePsi("bash", $"-lc \"echo {text}\"");
+    }
+
+    private static ProcessStartInfo StdinEchoPsi()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return CreateUtf8StdinPsi("powershell", "-NoProfile -NonInteractive -Command \"[Console]::In.ReadToEnd()\"");
+        }
+
+        return CreateUtf8StdinPsi("bash", "-lc \"cat\"");
     }
 
     [Fact]
@@ -91,14 +81,7 @@ public class AgentCliRunnerTests
     [Fact]
     public async Task RunAsync_ThrowsWhenExecutableNotFound()
     {
-        var psi = new ProcessStartInfo("nonexistent_cli_xyz_abc")
-        {
-            RedirectStandardInput = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
+        var psi = CreateSimplePsi("nonexistent_cli_xyz_abc", "");
         var runner = new AgentCliRunner(new FakeCliProcessor(psi));
         await Assert.ThrowsAnyAsync<Exception>(() => runner.RunAsync("any"));
     }
