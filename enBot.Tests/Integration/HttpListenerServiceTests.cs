@@ -87,4 +87,34 @@ public class HttpListenerServiceTests : IDisposable
         var response = await _client.GetAsync(Prefix.TrimEnd('/') + "/hook");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task WhenStopped_DoesNotFireEvents()
+    {
+        var fired = false;
+        _svc.OnRawPromptReceived = _ => fired = true;
+
+        _svc.Stop();
+
+        await Assert.ThrowsAnyAsync<Exception>(
+            () => Post("/hook", "{\"original\":\"hello world\"}"));
+        await Task.Delay(50);
+        Assert.False(fired);
+    }
+
+    [Fact]
+    public async Task WhenRestartedAfterStop_FiresEventsAgain()
+    {
+        _svc.Stop();
+        _svc.Start();
+
+        RawPrompt received = null;
+        _svc.OnRawPromptReceived = p => received = p;
+
+        var response = await Post("/hook", "{\"original\":\"hello world\"}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        await Task.Delay(50);
+        Assert.NotNull(received);
+    }
 }
