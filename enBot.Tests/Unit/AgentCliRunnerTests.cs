@@ -11,14 +11,57 @@ public class AgentCliRunnerTests
         public ProcessStartInfo GetProcessStartInfo(string prompt) => psi;
     }
 
-    private static ProcessStartInfo EchoPsi(string text) => new ProcessStartInfo("cmd", $"/c echo {text}")
+    private static ProcessStartInfo EchoPsi(string text)
     {
-        RedirectStandardInput = false,
-        RedirectStandardOutput = true,
-        RedirectStandardError = true,
-        UseShellExecute = false,
-        CreateNoWindow = true
-    };
+        if (OperatingSystem.IsWindows())
+        {
+            return new ProcessStartInfo("cmd", $"/c echo {text}")
+            {
+                RedirectStandardInput = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+        }
+
+        return new ProcessStartInfo("bash", $"-lc \"echo {text}\"")
+        {
+            RedirectStandardInput = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+    }
+
+    private static ProcessStartInfo StdinEchoPsi()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return new ProcessStartInfo("powershell", "-NoProfile -NonInteractive -Command \"[Console]::In.ReadToEnd()\"")
+            {
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                StandardOutputEncoding = System.Text.Encoding.UTF8,
+                StandardErrorEncoding = System.Text.Encoding.UTF8
+            };
+        }
+
+        return new ProcessStartInfo("bash", "-lc \"cat\"")
+        {
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = System.Text.Encoding.UTF8,
+            StandardErrorEncoding = System.Text.Encoding.UTF8
+        };
+    }
 
     [Fact]
     public async Task RunAsync_ReturnsStdout()
@@ -39,16 +82,7 @@ public class AgentCliRunnerTests
     [Fact]
     public async Task RunAsync_WritesPromptToStdin()
     {
-        var psi = new ProcessStartInfo("powershell", "-NoProfile -NonInteractive -Command \"[Console]::In.ReadToEnd()\"")
-        {
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            StandardOutputEncoding = System.Text.Encoding.UTF8,
-            StandardErrorEncoding = System.Text.Encoding.UTF8
-        };
+        var psi = StdinEchoPsi();
         var runner = new AgentCliRunner(new FakeCliProcessor(psi));
         var result = await runner.RunAsync("hello from test");
         Assert.Contains("hello from test", result);
