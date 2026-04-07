@@ -36,7 +36,7 @@ public partial class NotificationWindow : Window
 
     private void PositionBottomRight()
     {
-        var screen = Screens.Primary;
+        var screen = Screens.ScreenFromVisual(this) ?? Screens.Primary;
         if (screen is null) return;
 
         var workArea = screen.WorkingArea;
