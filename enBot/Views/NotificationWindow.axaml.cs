@@ -9,6 +9,7 @@ namespace enBot.Views;
 public partial class NotificationWindow : Window
 {
     private DispatcherTimer _timer;
+    private bool _pinned;
 
     public NotificationWindow()
     {
@@ -18,14 +19,30 @@ public partial class NotificationWindow : Window
         if (closeButton != null)
             closeButton.Click += OnDismiss;
 
+        var keepOpenButton = this.FindControl<Button>("KeepOpenButton");
+        if (keepOpenButton != null)
+            keepOpenButton.Click += OnKeepOpen;
+
         SizeChanged += (_, _) => PositionBottomRight();
     }
 
     public void StartAutoClose(int seconds = 8)
     {
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(seconds) };
-        _timer.Tick += (_, _) => Close();
+        _timer.Tick += (_, _) => { if (!_pinned) Close(); };
         _timer.Start();
+    }
+
+    private void OnKeepOpen(object sender, RoutedEventArgs e)
+    {
+        _pinned = true;
+        _timer?.Stop();
+
+        if (sender is Button btn)
+        {
+            btn.Content = "Pinned";
+            btn.IsEnabled = false;
+        }
     }
 
     protected override void OnOpened(EventArgs e)

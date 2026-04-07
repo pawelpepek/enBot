@@ -169,9 +169,14 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Footer: close -->
-            <Grid Grid.Row="2" Margin="0,12,0,0" ColumnDefinitions="*,Auto">
+            <!-- Footer: keep open + close -->
+            <Grid Grid.Row="2" Margin="0,12,0,0" ColumnDefinitions="*,Auto,Auto">
                 <Button Grid.Column="1"
+                        Content="Keep open"
+                        Padding="12,4"
+                        Margin="0,0,8,0"
+                        x:Name="KeepOpenButton"/>
+                <Button Grid.Column="2"
                         Content="Close"
                         Padding="12,4"
                         x:Name="CloseButton"/>
