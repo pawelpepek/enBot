@@ -15,7 +15,7 @@ public partial class NotificationViewModel : ViewModelBase
     public string Language { get; }
     public List<List<InlineSegment>> Explanations { get; }
     public bool HasExplanations { get; }
-    public string BetterVersion { get; }
+    public List<InlineSegment> BetterVersionInlines { get; }
     public bool HasBetterVersion { get; }
 
     public NotificationViewModel(HookPayload payload)
@@ -30,7 +30,7 @@ public partial class NotificationViewModel : ViewModelBase
         Language = "EN";
         Explanations = (payload.Explanations ?? []).ConvertAll(ParseCorrected);
         HasExplanations = Explanations.Count > 0;
-        BetterVersion = payload.BetterVersion;
+        BetterVersionInlines = ParseCorrected(payload.BetterVersion ?? string.Empty);
         HasBetterVersion = !string.IsNullOrWhiteSpace(payload.BetterVersion);
     }
 

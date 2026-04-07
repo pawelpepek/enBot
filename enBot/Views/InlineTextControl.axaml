@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="using:enBot.Models"
+             xmlns:converters="using:enBot.Converters"
+             x:Class="enBot.Views.InlineTextControl"
+             x:CompileBindings="False">
+
+    <UserControl.Resources>
+        <converters:BoldIfTrueConverter x:Key="BoldIfTrue"/>
+        <converters:ItalicIfTrueConverter x:Key="ItalicIfTrue"/>
+    </UserControl.Resources>
+
+    <ItemsControl ItemsSource="{Binding Segments, RelativeSource={RelativeSource AncestorType=UserControl}}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel Orientation="Horizontal"/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <TextBlock Text="{Binding Text}"
+                           FontWeight="{Binding IsBold, Converter={StaticResource BoldIfTrue}}"
+                           FontStyle="{Binding IsItalic, Converter={StaticResource ItalicIfTrue}}"/>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+</UserControl>
